@@ -32,6 +32,7 @@ dependencies = [
   "pillow>=10.1",
   "structlog>=24.1",
   "piper-tts>=1.4.2",
+  "python-dotenv>=1.0",
 ]
 
 [project.scripts]

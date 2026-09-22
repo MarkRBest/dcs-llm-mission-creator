@@ -18,6 +18,7 @@ import structlog
 
 from dcs_mission_creator.core.log import configure as configure_logging
 from dcs_mission_creator.core.mission_builder import MAX_PLAYERS, MIN_PLAYERS
+from dcs_mission_creator.core.mission_paths import output_relative_path
 
 if TYPE_CHECKING:
     from dcs_mission_creator.core.mission_builder import MissionBuilder
@@ -41,7 +42,7 @@ def run_cli(
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("out") / builder.name,
+        default=Path("out") / output_relative_path(builder),
         help="Output directory for the .miz and README.md (default: %(default)s)",
     )
     parser.add_argument(

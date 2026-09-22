@@ -148,9 +148,9 @@ if __name__ == "__main__":
 [`__main__.py`](src/dcs_mission_creator/__main__.py) auto-discovers every public
 submodule of `missions/` and exposes it as a `generate <name>` subcommand (plus
 `list`, `audit`, `survey`, `route`, `map-overlay`). The slug is optional:
-`generate` with no name builds **every** mission into its own `<slug>/` folder,
+`generate` with no name builds **every** mission into its own package-matched folder,
 logging past any that raise and exiting 1 if any failed. Default output is
-`$DCS_MISSIONS_FOLDER/IAGeneratedMissions/<slug>/`; the CLI errors out if that
+`$DCS_MISSIONS_FOLDER/IAGeneratedMissions/<map>/<package>/<mission>/`; the CLI errors out if that
 is unset and no `--output-dir` is given. `out/` and `*.miz` are gitignored.
 
 ## Script structure: small named functions

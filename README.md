@@ -57,18 +57,18 @@ uv run dcs-mission-creator generate                # no slug → every mission
 
 Each generator writes the `.miz`, the markdown briefing and the kneeboard cards into one output folder — see [What a generated mission ships](#what-a-generated-mission-ships).
 
-- **Default output:** `$DCS_MISSIONS_FOLDER/IAGeneratedMissions/<slug>/`. Set the `DCS_MISSIONS_FOLDER` env var to your DCS `Missions` folder so the `.miz` drops straight where DCS can load it; `generate` errors out if the var is unset and no `--output-dir` is given.
+- **Default output:** `$DCS_MISSIONS_FOLDER/IAGeneratedMissions/<map>/<package>/<mission>/`. The path mirrors the mission's location below `src/dcs_mission_creator/missions/`, keeping large libraries organised. Set `DCS_MISSIONS_FOLDER` to your DCS `Missions` folder so the `.miz` drops straight where DCS can load it; `generate` errors out if the var is unset and no `--output-dir` is given.
 - **Override:** `--output-dir DIR` writes everything to `DIR` instead.
-- **All at once:** omitting the mission slug generates every discovered mission, each into its own `<slug>/` folder; with `--output-dir DIR` that folder becomes `DIR/<slug>/`. A mission that fails is logged and the rest still run (exit code 1 at the end).
+- **All at once:** omitting the mission slug generates every discovered mission in its package hierarchy; with `--output-dir DIR`, a mission under `afghanistan/cap/` becomes `DIR/afghanistan/cap/<mission>/`. A mission that fails is logged and the rest still run (exit code 1 at the end).
 - **Loadouts:** set `DCS_INSTALL_DIR` to your DCS World folder. pydcs reads stock payloads from the installed game and otherwise finds it only via the Windows registry, so off Windows (WSL included) an unset var means the DCS task defaults come back empty. The same install is where the kneeboard's navaid frequencies and the theater's shipped charts are read from. Windows spellings are accepted and mapped to `/mnt/<drive>` under WSL.
 
 ```bash
 export DCS_MISSIONS_FOLDER="$HOME/Saved Games/DCS/Missions"
 export DCS_INSTALL_DIR="/mnt/e/Games/DCS World OpenBeta"   # WSL path to the game
 uv run dcs-mission-creator generate coastal_cover
-#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/coastal_cover/coastal_cover.miz
-#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/coastal_cover/README.md
-#   → .../coastal_cover/kneeboard/*.png
+#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/caucasus/coastal_cover/coastal_cover.miz
+#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/caucasus/coastal_cover/README.md
+#   → .../caucasus/coastal_cover/kneeboard/*.png
 
 uv run dcs-mission-creator generate coastal_cover --output-dir out/coastal_cover
 ```
