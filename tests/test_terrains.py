@@ -6,6 +6,8 @@ import pytest
 from dcs.terrain import Caucasus
 from dcs.terrain.terrain import Terrain
 
+from dcs_mission_creator.__main__ import build_parser
+from dcs_mission_creator.map_overlay.layers import BuildLayer
 from dcs_mission_creator.map_overlay.terrains import known_theaters, terrain_for
 
 
@@ -23,6 +25,7 @@ def test_terrain_for_unknown_slug_raises_value_error():
 @pytest.mark.parametrize(
     "slug",
     [
+        "afghanistan",
         "syria",
         "persiangulf",
         "nevada",
@@ -42,4 +45,14 @@ def test_known_theaters_is_sorted_and_full():
     assert known == sorted(known)
     assert "caucasus" in known
     assert "syria" in known
-    assert len(known) == 9
+    assert len(known) == 10
+
+
+def test_afghanistan_is_a_valid_overlay_build_target():
+    """The documented full build command reaches the normal build handler."""
+    args = build_parser({}).parse_args(
+        ["map-overlay", "build", "afghanistan", "--layers", "all"]
+    )
+
+    assert args.theater == "afghanistan"
+    assert args.layers == [BuildLayer.ALL]

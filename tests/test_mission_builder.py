@@ -133,6 +133,14 @@ def test_every_mission_declares_an_enum_difficulty():
         )
 
 
+def test_discovery_recurses_into_theater_packages():
+    """A theatre package must be just as discoverable as a flat mission module."""
+    from dcs_mission_creator.__main__ import _discover
+    from dcs_mission_creator.missions.caucasus.coastal_cover import CoastalCover
+
+    assert _discover()["coastal_cover"] is CoastalCover
+
+
 # -------------------------------------------------------- the template method
 class StubAssembler(MissionBuilder):
     """Exercises the real `build_miz`, recording the order the base calls in."""

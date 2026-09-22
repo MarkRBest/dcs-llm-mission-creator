@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Callable
 
 from dcs.terrain import (
+    Afghanistan,
     Caucasus,
     Falklands,
     MarianaIslands,
@@ -24,6 +25,7 @@ from dcs.terrain.terrain import Terrain
 # Each concrete terrain provides a no-arg `__init__`; the abstract base does
 # not, so we treat the registry as a no-arg factory rather than `type[Terrain]`.
 _REGISTRY: dict[str, Callable[[], Terrain]] = {
+    "afghanistan": Afghanistan,
     "caucasus": Caucasus,
     "syria": Syria,
     "persiangulf": PersianGulf,

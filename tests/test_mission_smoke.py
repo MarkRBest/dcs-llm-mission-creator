@@ -21,7 +21,7 @@ from dcs_mission_creator.__main__ import _discover
 from dcs_mission_creator.core.mission_builder import MissionBuilder
 from dcs_mission_creator.map_overlay.query import overlay_root
 
-_THEATERS = ("caucasus", "syria")
+_THEATERS = ("afghanistan", "caucasus", "syria")
 
 
 def _overlay_available(theater: str) -> bool:
