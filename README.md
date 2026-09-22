@@ -28,14 +28,14 @@ From a fresh clone to a loadable `.miz`:
 
 ### 1. Install `uv` and sync dependencies
 
-The project uses [uv](https://docs.astral.sh/uv/) for dependency and environment management. If you don't have it yet, install it first, then sync:
+The project uses [uv](https://docs.astral.sh/uv/) for dependency and environment management. It expects the current [pydcs](https://github.com/pydcs/dcs) checkout in a sibling `dcs/` directory (`../dcs` relative to this repository). If you don't have uv yet, install it first, then sync:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh   # skip if uv is already installed
 uv sync
 ```
 
-`uv sync` reads `pyproject.toml` and `uv.lock`, creates a `.venv/` if one doesn't exist, and installs the exact pinned dependencies (pydcs, the map-overlay build stack, the TTS engine, plus the `ruff` / `ty` / `pytest` dev tools). Run it once after cloning and again whenever the lockfile changes. Prefix project commands with `uv run` (e.g. `uv run dcs-mission-creator list`) so they execute inside that environment without a manual `activate`.
+`uv sync` reads `pyproject.toml` and `uv.lock`, creates a `.venv/` if one doesn't exist, installs pydcs from that sibling checkout in editable mode, and installs the exact pinned third-party dependencies (the map-overlay build stack, the TTS engine, plus the `ruff` / `ty` / `pytest` dev tools). Run it once after cloning and again whenever the lockfile changes. Prefix project commands with `uv run` (e.g. `uv run dcs-mission-creator list`) so they execute inside that environment without a manual `activate`.
 
 ### 2. Build the map overlay (one-time, per theater)
 
@@ -126,9 +126,15 @@ Difficulty is a reveal policy as much as a threat count: a `trained` mission dra
 
 ## Supported maps
 
-**Caucasus** and **Syria** are supported: both build a full overlay (elevation, slope, roads, rivers, buildings, vegetation, settlements) and can be targeted by `generate`. Caucasus is the primary theater and carries most of the example missions; it also has a hand-tuned clip to the visible map area in [coords.py](src/dcs_mission_creator/map_overlay/coords.py). Syria builds and queries the same way but falls back to the full pydcs terrain bounds (no hand-tuned visible-map clip yet).
+**Caucasus**, **Syria**, and **Afghanistan** can build a full overlay (elevation, slope, roads, rivers, buildings, vegetation, settlements). Afghanistan has no bundled overlay or mission module yet; build it with:
 
-The theater registry in [map_overlay/terrains.py](src/dcs_mission_creator/map_overlay/terrains.py) also recognises the other real-world pydcs maps by slug — `persiangulf`, `sinai`, `normandy`, `thechannel`, `falklands` — and each can build against the full-bounds fallback, but none is exercised yet; expect to add a visible-map clip in `coords.py` for clean coverage.
+```bash
+uv run dcs-mission-creator map-overlay build afghanistan --layers all
+```
+
+Caucasus is the primary theater and carries most of the example missions; it also has a hand-tuned clip to the visible map area in [coords.py](src/dcs_mission_creator/map_overlay/coords.py). Syria and Afghanistan build and query the same way but fall back to the full pydcs terrain bounds (no hand-tuned visible-map clip yet).
+
+The theater registry in [map_overlay/terrains.py](src/dcs_mission_creator/map_overlay/terrains.py) also recognises the other real-world pydcs maps by slug — `afghanistan`, `persiangulf`, `sinai`, `normandy`, `thechannel`, `falklands` — and each can build against the full-bounds fallback, but none is exercised yet; expect to add a visible-map clip in `coords.py` for clean coverage.
 
 The synthetic training-range maps (`nevada`, `marianaislands`) are recognised by name but out of scope — they have no real-world OSM / SRTM / WorldCover ground truth to build an overlay from.
 
