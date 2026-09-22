@@ -48,6 +48,7 @@ from dcs_mission_creator.core.mission_builder import (
     MIN_PLAYERS,
     MissionBuilder,
 )
+from dcs_mission_creator.core.mission_paths import output_relative_path
 from dcs_mission_creator.map_overlay.layers import BuildLayer, QueryLayer, RenderLayer
 
 if TYPE_CHECKING:
@@ -92,14 +93,14 @@ def _cmd_list(missions_map: dict[str, type[MissionBuilder]]) -> int:
     return 0
 
 
-def _default_output_dir(name: str) -> Path:
-    """Default output folder: $DCS_MISSIONS_FOLDER/IAGeneratedMissions/<name>/."""
+def _default_output_dir(cls: type[MissionBuilder]) -> Path:
+    """Default output folder, preserving the mission package hierarchy."""
     root = os.environ.get(_MISSIONS_ENV)
     if not root:
         raise SystemExit(
             f"{_MISSIONS_ENV} is not set; either export it or pass --output-dir."
         )
-    return Path(root) / _GENERATED_SUBDIR / name
+    return Path(root) / _GENERATED_SUBDIR / output_relative_path(cls)
 
 
 def _generate_one(
@@ -134,17 +135,21 @@ def _cmd_generate(
         cls = missions_map.get(name)
         if cls is None:
             return _unknown_mission(missions_map, name)
-        _generate_one(name, cls, output_dir or _default_output_dir(name), players)
+        _generate_one(name, cls, output_dir or _default_output_dir(cls), players)
         return 0
 
     if not missions_map:
         log.error("no missions found")
         return 2
 
-    # With no slug, `--output-dir` is the parent that receives one folder per mission.
+    # With no slug, `--output-dir` is the root that receives the mission tree.
     failed: list[str] = []
     for slug in sorted(missions_map):
-        target = output_dir / slug if output_dir else _default_output_dir(slug)
+        target = (
+            output_dir / output_relative_path(missions_map[slug])
+            if output_dir
+            else _default_output_dir(missions_map[slug])
+        )
         try:
             _generate_one(slug, missions_map[slug], target, players)
         except Exception:
@@ -584,9 +589,9 @@ def build_parser(
         default=None,
         help=(
             f"Output directory for the .miz and README.md "
-            f"(default: ${_MISSIONS_ENV}/{_GENERATED_SUBDIR}/<name>/). "
-            f"With no mission name, it is the parent that receives one "
-            f"<name>/ folder per mission."
+            f"(default: ${_MISSIONS_ENV}/{_GENERATED_SUBDIR}/<map>/<mission>/). "
+            f"With no mission name, it is the root that receives the same "
+            f"map/package hierarchy as src/dcs_mission_creator/missions/."
         ),
     )
     out_arg.completer = argcomplete.completers.DirectoriesCompleter()  # ty: ignore[unresolved-attribute]
