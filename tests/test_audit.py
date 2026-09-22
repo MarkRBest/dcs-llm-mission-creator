@@ -220,7 +220,7 @@ def test_an_armed_flight_is_silent():
 
 # -- the laser code ----------------------------------------------------------
 
-_GBU_12 = "TER_9A_with_2_x_GBU_12___500lb_Laser_Guided_Bomb"
+_GBU_12 = "TER_9_A___2_x_GBU_12___500lb_Laser_Guided_Bomb"
 
 
 def test_a_laser_weapon_with_no_stated_code_is_a_warning():

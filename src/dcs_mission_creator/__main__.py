@@ -60,12 +60,14 @@ log = structlog.get_logger(__name__)
 
 
 def _discover() -> dict[str, type[MissionBuilder]]:
-    """Return {slug: MissionBuilder subclass} for every public missions module."""
+    """Return builders from every public module in the mission package tree."""
     found: dict[str, type[MissionBuilder]] = {}
-    for info in pkgutil.iter_modules(missions.__path__):
-        if info.ispkg or info.name.startswith("_"):
+    prefix = f"{missions.__name__}."
+    for info in pkgutil.walk_packages(missions.__path__, prefix):
+        leaf = info.name.rsplit(".", maxsplit=1)[-1]
+        if info.ispkg or leaf.startswith("_"):
             continue
-        module = importlib.import_module(f"{missions.__name__}.{info.name}")
+        module = importlib.import_module(info.name)
         for obj in vars(module).values():
             if (
                 inspect.isclass(obj)

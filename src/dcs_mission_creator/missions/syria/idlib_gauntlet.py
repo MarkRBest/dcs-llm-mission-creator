@@ -308,11 +308,11 @@ _FITS = (
         stores=(
             (1, "AIM_120C_AMRAAM___Active_Radar_AAM"),
             (2, "AIM_9X_Sidewinder_IR_AAM"),
-            (3, "TER_9A_with_2_x_CBU_97___10_x_SFW_Cluster_Bomb"),
+            (3, "TER_9_A___2_x_CBU_97___10_x_SFW_Cluster_Bomb"),
             (4, "Fuel_tank_370_gal"),
             (5, "ALQ_184_Long"),
             (6, "Fuel_tank_370_gal"),
-            (7, "TER_9A_with_2_x_CBU_97___10_x_SFW_Cluster_Bomb_"),
+            (7, "TER_9_A___2_x_CBU_97___10_x_SFW_Cluster_Bomb_"),
             (8, "AIM_9X_Sidewinder_IR_AAM"),
             (9, "AIM_120C_AMRAAM___Active_Radar_AAM"),
             (11, "AN_AAQ_28_LITENING___Targeting_Pod_"),

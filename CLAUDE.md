@@ -73,9 +73,9 @@ the base guarantees is that nothing is *forgotten*.
 
 ## Package layout
 
-Mission scripts go in
-[src/dcs_mission_creator/missions/](src/dcs_mission_creator/missions/) as
-`<scenario_slug>.py`, one concrete subclass of `MissionBuilder`
+Mission scripts go in the appropriate terrain package beneath
+[src/dcs_mission_creator/missions/](src/dcs_mission_creator/missions/), for
+example `caucasus/<scenario_slug>.py`, with one concrete subclass of `MissionBuilder`
 ([core/mission_builder.py](src/dcs_mission_creator/core/mission_builder.py))
 per module.
 
@@ -158,7 +158,7 @@ is unset and no `--output-dir` is given. `out/` and `*.miz` are gitignored.
 `_assemble` is the orchestrator, not the implementation. Each block of the
 mission gets its own method whose name says what the block produces and whose
 docstring states the design intent in one line. Pattern (see
-[coastal_cover.py](src/dcs_mission_creator/missions/coastal_cover.py)):
+[coastal_cover.py](src/dcs_mission_creator/missions/caucasus/coastal_cover.py)):
 
 ```python
 def _assemble(self, m: Mission, plan: PlanOverlay) -> Assembled:
@@ -1885,7 +1885,7 @@ because CI has neither. That is a hard constraint on anything committed here:
 available)
 
 ```bash
-uv run python -m dcs_mission_creator.missions.coastal_cover --players 2
+uv run python -m dcs_mission_creator.missions.caucasus.coastal_cover --players 2
 
 # or via the unified CLI (auto-discovers every mission module):
 uv run dcs-mission-creator list
