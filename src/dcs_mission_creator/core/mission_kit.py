@@ -40,6 +40,7 @@ __all__ = [
     "MAX_FLIGHT_SIZE",
     "offset",
     "player_flight",
+    "player_flight_from_unit",
     "player_groups",
     "RaceTrack",
     "race_track",
@@ -252,6 +253,7 @@ def player_flight(
     start_type: StartType,
     slots: int,
     loadouts: Sequence[Loadout],
+    section_start_types: Sequence[StartType] | None = None,
 ) -> list[FlyingGroup]:
     """Build the player flight as however many DCS-legal sections it takes.
 
@@ -273,18 +275,21 @@ def player_flight(
     Returns the sections in slot order, lead first; a mission that needs "the
     player flight" for a trigger wants all of them (`sections_of`).
     """
-    sections: list[FlyingGroup] = []
     sizes = section_sizes(slots)
+    starts = _section_start_types(start_type, section_start_types, len(sizes))
+    sections: list[FlyingGroup] = []
     assignment = loadout.assign(loadouts, slots)
     slot = 0
-    for section_name, size in zip(section_names(name, len(sizes)), sizes):
+    for section_name, size, section_start in zip(
+        section_names(name, len(sizes)), sizes, starts
+    ):
         group = m.flight_group_from_airport(
             country=country,
             name=section_name,
             aircraft_type=aircraft_type,
             airport=airport,
             maintask=maintask,
-            start_type=start_type,
+            start_type=section_start,
             group_size=size,
         )
         mark_clients(group)
@@ -295,6 +300,69 @@ def player_flight(
     _sections(m).append(tuple(sections))
     loadout.record(m, name, assignment)
     return sections
+
+
+def player_flight_from_unit(
+    m: Mission,
+    *,
+    country: Country,
+    name: str,
+    aircraft_type: type[FlyingType],
+    pad_group: Group,
+    maintask: type[MainTask],
+    start_type: StartType,
+    slots: int,
+    loadouts: Sequence[Loadout],
+    section_start_types: Sequence[StartType] | None = None,
+) -> list[FlyingGroup]:
+    """Build one split player flight on a carrier or FARP.
+
+    This is the carrier/FARP counterpart to :func:`player_flight`. Keeping the
+    split here matters for more than convenience: eight client slots are two
+    DCS groups, but they remain one operational flight for the loadout table,
+    kneeboard and DTC route checks. ``section_start_types`` permits, for
+    example, a four-ship hot section and a four-ship cold section at the same
+    operating location without pretending they are unrelated flights.
+    """
+    sizes = section_sizes(slots)
+    starts = _section_start_types(start_type, section_start_types, len(sizes))
+    sections: list[FlyingGroup] = []
+    assignment = loadout.assign(loadouts, slots)
+    slot = 0
+    for section_name, size, section_start in zip(
+        section_names(name, len(sizes)), sizes, starts
+    ):
+        group = m.flight_group_from_unit(
+            country=country,
+            name=section_name,
+            aircraft_type=aircraft_type,
+            pad_group=pad_group,
+            maintask=maintask,
+            start_type=section_start,
+            group_size=size,
+        )
+        mark_clients(group)
+        for unit in group.units:
+            loadout.arm_unit(unit, aircraft_type, assignment[slot].stores)
+            slot += 1
+        sections.append(group)
+    _sections(m).append(tuple(sections))
+    loadout.record(m, name, assignment)
+    return sections
+
+
+def _section_start_types(
+    default: StartType,
+    requested: Sequence[StartType] | None,
+    count: int,
+) -> tuple[StartType, ...]:
+    """Resolve one start state per DCS section, rejecting ambiguous input."""
+    starts = tuple(requested) if requested is not None else (default,) * count
+    if len(starts) != count:
+        raise ValueError(
+            f"section_start_types has {len(starts)} entries for {count} sections"
+        )
+    return starts
 
 
 def sections_of(m: Mission, group: FlyingGroup) -> tuple[FlyingGroup, ...]:

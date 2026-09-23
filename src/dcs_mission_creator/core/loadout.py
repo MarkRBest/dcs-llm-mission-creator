@@ -91,6 +91,18 @@ __all__ = [
 #: the mission wrote rather than off a per-mission constant that can drift.
 _AAM_SUFFIX = "_AAM"
 
+# Multi-missile launchers whose pydcs attribute does not end in `_AAM`.  A
+# loadout records one store per pylon, so without this multiplier a Hornet's
+# dual AMRAAM rail counted as zero shots and the force-balance audit reported
+# eight missiles for a two-ship that physically carries twenty-four.
+_AAM_RACK_COUNTS = {
+    "LAU_115_2_LAU_127_AIM_120C": 2,
+}
+
+# Tomcat pylon attributes name the rail or the missile but do not carry ED's
+# generic ``_AAM`` suffix, so the ordinary suffix rule cannot see them.
+_AAM_SINGLE_MARKERS = ("AIM_54", "AIM_7", "LAU_138_AIM_9", "LAU_7_AIM_9")
+
 
 @dataclass(frozen=True)
 class Loadout:
@@ -172,7 +184,16 @@ def air_to_air_shots(fit: Loadout) -> int:
     Counted off the store names, so the number the force-balance arithmetic
     divides by two is the number actually on the rails.
     """
-    return sum(1 for _, weapon in fit.stores if weapon.endswith(_AAM_SUFFIX))
+    return sum(
+        _AAM_RACK_COUNTS.get(
+            weapon,
+            int(
+                weapon.endswith(_AAM_SUFFIX)
+                or any(marker in weapon for marker in _AAM_SINGLE_MARKERS)
+            ),
+        )
+        for _, weapon in fit.stores
+    )
 
 
 def shots(assignment: Sequence[Loadout]) -> int:

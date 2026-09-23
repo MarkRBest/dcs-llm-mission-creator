@@ -109,12 +109,16 @@ Claude authors a new module under [src/dcs_mission_creator/missions/](src/dcs_mi
 
 ## Bundled mission examples
 
-Worked missions ship under [src/dcs_mission_creator/missions/](src/dcs_mission_creator/missions/), grouped into `afghanistan/`, `caucasus/`, and `syria/` packages. Read them as templates for what a generator does with the overlay, flight packages, threats, triggers, and TTS. Combat missions are built for 2–6 coop slots (`--players`), and each module's own docstring is its full brief — this table is only the index.
+Worked missions ship under [src/dcs_mission_creator/missions/](src/dcs_mission_creator/missions/), grouped into `afghanistan/`, `caucasus/`, and `syria/` packages. Read them as templates for what a generator does with the overlay, flight packages, threats, triggers, and TTS. Combat missions are normally built for 2–6 coop slots (`--players`); `panjshir_blackout` is deliberately fixed at one player plus one AI wingman. Each module's own docstring is its full brief — this table is only the index.
 
 | Slug | Theater | Difficulty | Sortie |
 |------|---------|-----------|--------|
 | [`bagram_cave_strike`](src/dcs_mission_creator/missions/afghanistan/bagram_cave_strike.py) | Afghanistan | recruit | Hot-start F/A-18C strike from Bagram to a defended Panjshir mountain bunker/cave entrance. |
+| [`bagram_convoy_ambush`](src/dcs_mission_creator/missions/afghanistan/bagram_convoy_ambush.py) | Afghanistan | trained | Hot-start F/A-18C interdiction of a moving Panjshir convoy; the lead kill wakes a concealed MANPADS team and destroying the column scrambles a MiG-29A alert pair from Kabul. |
+| [`bagram_wildcard`](src/dcs_mission_creator/missions/afghanistan/bagram_wildcard.py) | Afghanistan | trained | Fixed single-player F/A-18C fighter sweep with an AI wingman, airborne AWACS, and a runtime-random ten-aircraft MiG/Sukhoi package arriving in spaced one-to-three-ship waves. |
+| [`panjshir_blackout`](src/dcs_mission_creator/missions/afghanistan/panjshir_blackout.py) | Afghanistan | veteran | Fixed single-player F/A-18C strike with an AI wingman against a hardened IADS command node behind a Skynet-controlled SA-10/SA-11 network; terrain-masked ingress, HARM suppression, penetrator-JDAM terminal attack. |
 | [`batumi_tacan_trainer`](src/dcs_mission_creator/missions/caucasus/batumi_tacan_trainer.py) | Caucasus | recruit | A no-combat navigation and landing exercise from Batumi to nearby Kobuleti. Choose an A-10C, F-16C-50, or F/A-18C client slot; use KBL TACAN 67X in low cloud, then land in a 10 kt crosswind. |
+| [`coastal_lantern`](src/dcs_mission_creator/missions/caucasus/coastal_lantern.py) | Caucasus | trained | Fictional wide multiplayer campaign with independent CAP, SEAD, strike, CAS and helicopter objectives behind a Skynet-controlled SA-10/SA-11 network. Fourteen modules and 112 client slots, split hot/cold at each location; Hornets and all three Tomcat variants operate from two carriers. |
 | [`coastal_cover`](src/dcs_mission_creator/missions/caucasus/coastal_cover.py) | Caucasus | trained | CAP + escort of an A-10C `Hawg` strike on a Russian armoured convoy north of Senaki; handle a 2-ship MiG-29S intercept from Sukhumi-Babushara. AWACS only, no tanker. Carries a recon still of the column on the valley road. |
 | [`kodori_strike`](src/dcs_mission_creator/missions/caucasus/kodori_strike.py) | Caucasus | trained | Lead a mixed package (`Weasel` SEAD, `Eagle` F-15C CAP, `Magic` AWACS, `Texaco` tanker) onto a Russian FOB astride the coast road at the Kodori delta; SA-6 rollback inland, Su-27 CAP launches on intrusion. |
 | [`abkhaz_sweep`](src/dcs_mission_creator/missions/caucasus/abkhaz_sweep.py) | Caucasus | ace | Air-superiority sweep off the Abkhaz coast vs. Su-27 + MiG-29S aggressors from Sochi-Adler / Gudauta, under an SA-6 that forces a high fight. No support. |
@@ -128,7 +132,7 @@ Difficulty is a reveal policy as much as a threat count: a `trained` mission dra
 
 ## Supported maps
 
-**Caucasus**, **Syria**, and **Afghanistan** can build a full overlay (elevation, slope, roads, rivers, buildings, vegetation, settlements). Afghanistan includes the `bagram_cave_strike` mission; build its overlay with:
+**Caucasus**, **Syria**, and **Afghanistan** can build a full overlay (elevation, slope, roads, rivers, buildings, vegetation, settlements). Afghanistan includes the Bagram/Panjshir missions; build its overlay with:
 
 ```bash
 uv run dcs-mission-creator map-overlay build afghanistan --layers all
