@@ -28,14 +28,14 @@ From a fresh clone to a loadable `.miz`:
 
 ### 1. Install `uv` and sync dependencies
 
-The project uses [uv](https://docs.astral.sh/uv/) for dependency and environment management. If you don't have it yet, install it first, then sync:
+The project uses [uv](https://docs.astral.sh/uv/) for dependency and environment management. It expects the current [pydcs](https://github.com/pydcs/dcs) checkout in a sibling `dcs/` directory (`../dcs` relative to this repository). If you don't have uv yet, install it first, then sync:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh   # skip if uv is already installed
 uv sync
 ```
 
-`uv sync` reads `pyproject.toml` and `uv.lock`, creates a `.venv/` if one doesn't exist, and installs the exact pinned dependencies (pydcs, the map-overlay build stack, the TTS engine, plus the `ruff` / `ty` / `pytest` dev tools). Run it once after cloning and again whenever the lockfile changes. Prefix project commands with `uv run` (e.g. `uv run dcs-mission-creator list`) so they execute inside that environment without a manual `activate`.
+`uv sync` reads `pyproject.toml` and `uv.lock`, creates a `.venv/` if one doesn't exist, installs pydcs from that sibling checkout in editable mode, and installs the exact pinned third-party dependencies (the map-overlay build stack, the TTS engine, plus the `ruff` / `ty` / `pytest` dev tools). Run it once after cloning and again whenever the lockfile changes. Prefix project commands with `uv run` (e.g. `uv run dcs-mission-creator list`) so they execute inside that environment without a manual `activate`.
 
 ### 2. Build the map overlay (one-time, per theater)
 
@@ -57,23 +57,23 @@ uv run dcs-mission-creator generate                # no slug → every mission
 
 Each generator writes the `.miz`, the markdown briefing and the kneeboard cards into one output folder — see [What a generated mission ships](#what-a-generated-mission-ships).
 
-- **Default output:** `$DCS_MISSIONS_FOLDER/IAGeneratedMissions/<slug>/`. Set the `DCS_MISSIONS_FOLDER` env var to your DCS `Missions` folder so the `.miz` drops straight where DCS can load it; `generate` errors out if the var is unset and no `--output-dir` is given.
+- **Default output:** `$DCS_MISSIONS_FOLDER/IAGeneratedMissions/<map>/<package>/<mission>/`. The path mirrors the mission's location below `src/dcs_mission_creator/missions/`, keeping large libraries organised. Set `DCS_MISSIONS_FOLDER` to your DCS `Missions` folder so the `.miz` drops straight where DCS can load it; `generate` errors out if the var is unset and no `--output-dir` is given.
 - **Override:** `--output-dir DIR` writes everything to `DIR` instead.
-- **All at once:** omitting the mission slug generates every discovered mission, each into its own `<slug>/` folder; with `--output-dir DIR` that folder becomes `DIR/<slug>/`. A mission that fails is logged and the rest still run (exit code 1 at the end).
+- **All at once:** omitting the mission slug generates every discovered mission in its package hierarchy; with `--output-dir DIR`, a mission under `afghanistan/cap/` becomes `DIR/afghanistan/cap/<mission>/`. A mission that fails is logged and the rest still run (exit code 1 at the end).
 - **Loadouts:** set `DCS_INSTALL_DIR` to your DCS World folder. pydcs reads stock payloads from the installed game and otherwise finds it only via the Windows registry, so off Windows (WSL included) an unset var means the DCS task defaults come back empty. The same install is where the kneeboard's navaid frequencies and the theater's shipped charts are read from. Windows spellings are accepted and mapped to `/mnt/<drive>` under WSL.
 
 ```bash
 export DCS_MISSIONS_FOLDER="$HOME/Saved Games/DCS/Missions"
 export DCS_INSTALL_DIR="/mnt/e/Games/DCS World OpenBeta"   # WSL path to the game
 uv run dcs-mission-creator generate coastal_cover
-#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/coastal_cover/coastal_cover.miz
-#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/coastal_cover/README.md
-#   → .../coastal_cover/kneeboard/*.png
+#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/caucasus/coastal_cover/coastal_cover.miz
+#   → $DCS_MISSIONS_FOLDER/IAGeneratedMissions/caucasus/coastal_cover/README.md
+#   → .../caucasus/coastal_cover/kneeboard/*.png
 
 uv run dcs-mission-creator generate coastal_cover --output-dir out/coastal_cover
 ```
 
-Add `--players N` (1–4) to scale the player flight into a coop mission.
+Add `--players N` (2–6) to scale the player flight into a coop mission.
 
 ### 4. Fly it
 
@@ -109,26 +109,38 @@ Claude authors a new module under [src/dcs_mission_creator/missions/](src/dcs_mi
 
 ## Bundled mission examples
 
-Worked missions ship under [src/dcs_mission_creator/missions/](src/dcs_mission_creator/missions/) — read them as templates for what a generator does with the overlay, flight packages, threats, triggers, and TTS. All are F-16C-50 sorties built for 2–6 coop slots (`--players`), with the flight's loadout split across them; every ground placement comes from the `map_overlay` tactical-scene helpers, not hand-tuned offsets. Each module's own docstring is that mission's full brief — this table is only the index.
+Worked missions ship under [src/dcs_mission_creator/missions/](src/dcs_mission_creator/missions/), grouped into `afghanistan/`, `caucasus/`, and `syria/` packages. Read them as templates for what a generator does with the overlay, flight packages, threats, triggers, and TTS. Combat missions are normally built for 2–6 coop slots (`--players`); `panjshir_blackout` is deliberately fixed at one player plus one AI wingman. Each module's own docstring is its full brief — this table is only the index.
 
 | Slug | Theater | Difficulty | Sortie |
 |------|---------|-----------|--------|
-| [`coastal_cover`](src/dcs_mission_creator/missions/coastal_cover.py) | Caucasus | trained | CAP + escort of an A-10C `Hawg` strike on a Russian armoured convoy north of Senaki; handle a 2-ship MiG-29S intercept from Sukhumi-Babushara. AWACS only, no tanker. Carries a recon still of the column on the valley road. |
-| [`kodori_strike`](src/dcs_mission_creator/missions/kodori_strike.py) | Caucasus | trained | Lead a mixed package (`Weasel` SEAD, `Eagle` F-15C CAP, `Magic` AWACS, `Texaco` tanker) onto a Russian FOB astride the coast road at the Kodori delta; SA-6 rollback inland, Su-27 CAP launches on intrusion. |
-| [`idlib_gauntlet`](src/dcs_mission_creator/missions/idlib_gauntlet.py) | Syria | trained | Interdict a Syrian resupply column out of Hatay through three overlapping SAM belts that sit dark, cue off the EWR chain and go quiet under HARM fire. A 90 km front line prices every flank and funnels the ingress into the SA-6's sector; a JTAC lases the column and reads coordinates in your own cockpit's format. The reference mission for SEAD, front lines, and recon stills. |
-| [`eastern_shield`](src/dcs_mission_creator/missions/eastern_shield.py) | Syria | trained | SEAD an SA-6 defending the Kuweires depot, escort A-10C `Hawg` onto it, then a MiG-29S scramble + armoured reserve push. Full support: `Magic` AWACS, `Texaco` tanker, `Eagle` F-15C TARCAP. |
-| [`ansariyah_works`](src/dcs_mission_creator/missions/ansariyah_works.py) | Syria | veteran | Deep strike out of Akrotiri on a Syrian rocket-motor plant behind the Jebel al-Ansariyah — 279 km east, 250 km of it water, flown at fifty metres under an S-200 that reaches most of the way to Cyprus and cannot shoot below three hundred. Three buildings, two bombs, one briefed choice. |
-| [`abkhaz_sweep`](src/dcs_mission_creator/missions/abkhaz_sweep.py) | Caucasus | ace | Air-superiority sweep off the Abkhaz coast vs. Su-27 + MiG-29S aggressors from Sochi-Adler / Gudauta, under an SA-6 that forces a high fight. No support. |
-| [`daryal_run`](src/dcs_mission_creator/missions/daryal_run.py) | Caucasus | ace | SEAD strike on an S-300PS (SA-10) south of Beslan; low-level ingress up the Daryal Gorge, terrain-masked HARM pop-up. AWACS only, no escort/tanker. |
-| [`kuban_forge`](src/dcs_mission_creator/missions/kuban_forge.py) | Caucasus | ace | Strike out of Senaki on a motor works on the Kuban, flown up the Abkhaz plain and the Kodori and over the Klukhori Pass. No anti-radiation weapon: the terrain is the SEAD, and the corridor is masked from the Buk until 34 km short. Low in, high out. |
+| [`bagram_cave_strike`](src/dcs_mission_creator/missions/afghanistan/bagram_cave_strike.py) | Afghanistan | recruit | Hot-start F/A-18C strike from Bagram to a defended Panjshir mountain bunker/cave entrance. |
+| [`bagram_convoy_ambush`](src/dcs_mission_creator/missions/afghanistan/bagram_convoy_ambush.py) | Afghanistan | trained | Hot-start F/A-18C interdiction of a moving Panjshir convoy; the lead kill wakes a concealed MANPADS team and destroying the column scrambles a MiG-29A alert pair from Kabul. |
+| [`bagram_wildcard`](src/dcs_mission_creator/missions/afghanistan/bagram_wildcard.py) | Afghanistan | trained | Fixed single-player F/A-18C fighter sweep with an AI wingman, airborne AWACS, and a runtime-random ten-aircraft MiG/Sukhoi package arriving in spaced one-to-three-ship waves. |
+| [`panjshir_blackout`](src/dcs_mission_creator/missions/afghanistan/panjshir_blackout.py) | Afghanistan | veteran | Fixed single-player F/A-18C strike with an AI wingman against a hardened IADS command node behind a Skynet-controlled SA-10/SA-11 network; terrain-masked ingress, HARM suppression, penetrator-JDAM terminal attack. |
+| [`batumi_tacan_trainer`](src/dcs_mission_creator/missions/caucasus/batumi_tacan_trainer.py) | Caucasus | recruit | A no-combat navigation and landing exercise from Batumi to nearby Kobuleti. Choose an A-10C, F-16C-50, or F/A-18C client slot; use KBL TACAN 67X in low cloud, then land in a 10 kt crosswind. |
+| [`coastal_lantern`](src/dcs_mission_creator/missions/caucasus/coastal_lantern.py) | Caucasus | trained | Fictional wide multiplayer campaign with independent CAP, SEAD, strike, CAS and helicopter objectives behind a Skynet-controlled SA-10/SA-11 network. Fourteen modules and 112 client slots, split hot/cold at each location; Hornets and all three Tomcat variants operate from two carriers. |
+| [`coastal_cover`](src/dcs_mission_creator/missions/caucasus/coastal_cover.py) | Caucasus | trained | CAP + escort of an A-10C `Hawg` strike on a Russian armoured convoy north of Senaki; handle a 2-ship MiG-29S intercept from Sukhumi-Babushara. AWACS only, no tanker. Carries a recon still of the column on the valley road. |
+| [`kodori_strike`](src/dcs_mission_creator/missions/caucasus/kodori_strike.py) | Caucasus | trained | Lead a mixed package (`Weasel` SEAD, `Eagle` F-15C CAP, `Magic` AWACS, `Texaco` tanker) onto a Russian FOB astride the coast road at the Kodori delta; SA-6 rollback inland, Su-27 CAP launches on intrusion. |
+| [`abkhaz_sweep`](src/dcs_mission_creator/missions/caucasus/abkhaz_sweep.py) | Caucasus | ace | Air-superiority sweep off the Abkhaz coast vs. Su-27 + MiG-29S aggressors from Sochi-Adler / Gudauta, under an SA-6 that forces a high fight. No support. |
+| [`daryal_run`](src/dcs_mission_creator/missions/caucasus/daryal_run.py) | Caucasus | ace | SEAD strike on an S-300PS (SA-10) south of Beslan; low-level ingress up the Daryal Gorge, terrain-masked HARM pop-up. AWACS only, no escort/tanker. |
+| [`kuban_forge`](src/dcs_mission_creator/missions/caucasus/kuban_forge.py) | Caucasus | ace | Strike out of Senaki on a motor works on the Kuban, flown up the Abkhaz plain and the Kodori and over the Klukhori Pass. No anti-radiation weapon: the terrain is the SEAD, and the corridor is masked from the Buk until 34 km short. Low in, high out. |
+| [`idlib_gauntlet`](src/dcs_mission_creator/missions/syria/idlib_gauntlet.py) | Syria | trained | Interdict a Syrian resupply column out of Hatay through three overlapping SAM belts that sit dark, cue off the EWR chain and go quiet under HARM fire. A 90 km front line prices every flank and funnels the ingress into the SA-6's sector; a JTAC lases the column and reads coordinates in your own cockpit's format. The reference mission for SEAD, front lines, and recon stills. |
+| [`eastern_shield`](src/dcs_mission_creator/missions/syria/eastern_shield.py) | Syria | trained | SEAD an SA-6 defending the Kuweires depot, escort A-10C `Hawg` onto it, then a MiG-29S scramble + armoured reserve push. Full support: `Magic` AWACS, `Texaco` tanker, `Eagle` F-15C TARCAP. |
+| [`ansariyah_works`](src/dcs_mission_creator/missions/syria/ansariyah_works.py) | Syria | veteran | Deep strike out of Akrotiri on a Syrian rocket-motor plant behind the Jebel al-Ansariyah — 279 km east, 250 km of it water, flown at fifty metres under an S-200 that reaches most of the way to Cyprus and cannot shoot below three hundred. Three buildings, two bombs, one briefed choice. |
 
 Difficulty is a reveal policy as much as a threat count: a `trained` mission draws its threat rings about 2 km off truth, `veteran` a quarter wider and 4 km off, `ace` wider again and 6 km off. Every mission loads its briefed rings into the F-16C's data cartridge and prints them on the kneeboard, so what changes with difficulty is how far the drawn ring sits from the launchers — never whether the player gets one.
 
 ## Supported maps
 
-**Caucasus** and **Syria** are supported: both build a full overlay (elevation, slope, roads, rivers, buildings, vegetation, settlements) and can be targeted by `generate`. Caucasus is the primary theater and carries most of the example missions; it also has a hand-tuned clip to the visible map area in [coords.py](src/dcs_mission_creator/map_overlay/coords.py). Syria builds and queries the same way but falls back to the full pydcs terrain bounds (no hand-tuned visible-map clip yet).
+**Caucasus**, **Syria**, and **Afghanistan** can build a full overlay (elevation, slope, roads, rivers, buildings, vegetation, settlements). Afghanistan includes the Bagram/Panjshir missions; build its overlay with:
 
-The theater registry in [map_overlay/terrains.py](src/dcs_mission_creator/map_overlay/terrains.py) also recognises the other real-world pydcs maps by slug — `persiangulf`, `sinai`, `normandy`, `thechannel`, `falklands` — and each can build against the full-bounds fallback, but none is exercised yet; expect to add a visible-map clip in `coords.py` for clean coverage.
+```bash
+uv run dcs-mission-creator map-overlay build afghanistan --layers all
+```
+
+Caucasus is the primary theater and carries most of the example missions; it also has a hand-tuned clip to the visible map area in [coords.py](src/dcs_mission_creator/map_overlay/coords.py). Syria and Afghanistan build and query the same way but fall back to the full pydcs terrain bounds (no hand-tuned visible-map clip yet).
+
+The theater registry in [map_overlay/terrains.py](src/dcs_mission_creator/map_overlay/terrains.py) also recognises the other real-world pydcs maps by slug — `afghanistan`, `persiangulf`, `sinai`, `normandy`, `thechannel`, `falklands` — and each can build against the full-bounds fallback, but none is exercised yet; expect to add a visible-map clip in `coords.py` for clean coverage.
 
 The synthetic training-range maps (`nevada`, `marianaislands`) are recognised by name but out of scope — they have no real-world OSM / SRTM / WorldCover ground truth to build an overlay from.
 
@@ -322,7 +334,7 @@ ewr    = ewr_high_ground(scene, rear_anchor, min_elevation_m=300, min_prominence
 
 All of these return `dcs.mapping.Point` instances that the mission builder threads straight into `vehicle_group(..., position=p)`. DCS handles convoy routing between `PointAction.OnRoad` waypoints itself — the overlay's job is to pick *good* waypoints, not to route between them.
 
-A worked example lives in [missions/coastal_cover.py](src/dcs_mission_creator/missions/coastal_cover.py): a Russian convoy snapped onto a real road north of Senaki, a two-launcher SA-13 placed on a prominence west of the convoy with verified line-of-sight, and a 55G6 EWR on high ground inland from Sukhumi-Babushara.
+A worked example lives in [missions/caucasus/coastal_cover.py](src/dcs_mission_creator/missions/caucasus/coastal_cover.py): a Russian convoy snapped onto a real road north of Senaki, a two-launcher SA-13 placed on a prominence west of the convoy with verified line-of-sight, and a 55G6 EWR on high ground inland from Sukhumi-Babushara.
 
 # Voice lines (TTS)
 
@@ -366,7 +378,7 @@ tts = VoiceSynth(backend=PiperBackend(voice="en_GB-alan-medium", length_scale=1.
 2. Add a `main()` at the bottom (`run_cli(TheBuilder)` from [core/cli.py](src/dcs_mission_creator/core/cli.py)) so `python -m dcs_mission_creator.missions.<slug>` works.
 3. The unified CLI auto-discovers the module — `uv run dcs-mission-creator list` will show the new mission immediately, and `generate <slug>` will run it.
 
-Keep `_assemble` an orchestrator: one small named method per block of the mission (one flight, one ground cluster, one trigger group), each with a docstring stating the design intent. [coastal_cover.py](src/dcs_mission_creator/missions/coastal_cover.py) is the shortest example of the shape; [idlib_gauntlet.py](src/dcs_mission_creator/missions/idlib_gauntlet.py) the fullest.
+Keep `_assemble` an orchestrator: one small named method per block of the mission (one flight, one ground cluster, one trigger group), each with a docstring stating the design intent. [coastal_cover.py](src/dcs_mission_creator/missions/caucasus/coastal_cover.py) is the shortest example of the shape; [idlib_gauntlet.py](src/dcs_mission_creator/missions/syria/idlib_gauntlet.py) the fullest.
 
 See [CLAUDE.md](CLAUDE.md) for the project conventions (the `MissionBuilder` contract, every `core/` helper, briefing style, faction naming) and [.claude/skills/dcs-mission/SKILL.md](.claude/skills/dcs-mission/SKILL.md) for the design playbook.
 

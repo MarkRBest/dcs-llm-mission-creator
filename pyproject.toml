@@ -15,7 +15,7 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-  "pydcs @ git+https://github.com/pydcs/dcs.git",
+  "pydcs",
   "argcomplete>=3.1",
   "numpy>=1.26",
   "scipy>=1.11",
@@ -32,10 +32,16 @@ dependencies = [
   "pillow>=10.1",
   "structlog>=24.1",
   "piper-tts>=1.4.2",
+  "python-dotenv>=1.0",
 ]
 
 [project.scripts]
 dcs-mission-creator = "dcs_mission_creator.__main__:main"
+
+[tool.uv.sources]
+# Use the sibling pydcs checkout so new terrain support can be developed and
+# consumed here without waiting for an upstream release.
+pydcs = { path = "../dcs", editable = true }
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -87,4 +93,3 @@ extend-select = ["I"]
 known-first-party = ["dcs_mission_creator"]
 combine-as-imports = true
 split-on-trailing-comma = true
-
