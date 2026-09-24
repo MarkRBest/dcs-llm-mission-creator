@@ -1,10 +1,9 @@
 """Afghanistan ``Bagram Convoy Ambush`` — a strike that becomes an intercept.
 
 Razor launches from Bagram to stop a small Russian-backed convoy before it
-reaches the Panjshir-side villages.  Destroying the lead vehicle wakes a hidden
-MANPADS team; destroying the convoy sends a MiG-29A alert pair out of Kabul.
-The two events are intentionally separate: the first makes the bombing run
-matter, and the second gives the AMRAAMs and AIM-9Xs a clear purpose on egress.
+reaches the Panjshir-side villages. Destroying the lead vehicle wakes a hidden
+MANPADS team; dropping the convoy below half health releases two Kabul fighter
+pairs by different mechanisms so their launch behavior can be compared.
 """
 
 from __future__ import annotations
@@ -76,6 +75,13 @@ _MIG_STORES = (
     (6, "R_73__AA_11_Archer____Infra_Red"),
     (7, "R_73__AA_11_Archer____Infra_Red"),
 )
+_MIG23_TEST_GROUP_NAME = "Kabul MiG-23 test pair"
+_MIG23_TEST_STORES = (
+    (2, "R_24T__AA_7_Apex_IR____Infra_Red"),
+    (3, "APU_60_1M_with_R_60M__AA_8_Aphid_B____IR_AAM_"),
+    (5, "APU_60_1M_with_R_60M__AA_8_Aphid_B____IR_AAM_"),
+    (6, "R_24T__AA_7_Apex_IR____Infra_Red"),
+)
 
 
 class BagramConvoyAmbush(MissionBuilder):
@@ -87,12 +93,12 @@ class BagramConvoyAmbush(MissionBuilder):
     terrain = Afghanistan
     blue_task = (
         "Destroy the convoy before it reaches the Panjshir-side villages. "
-        "Expect MANPADS after the lead vehicle is hit and a MiG-29A scramble "
-        "from Kabul once the convoy is destroyed; recover at Bagram."
+        "Expect MANPADS after the lead vehicle is hit and both Kabul fighter "
+        "pairs to launch when the convoy falls below 50% life; recover at Bagram."
     )
     red_task = (
         "Move the supply convoy into the Panjshir foothills, defend it with a "
-        "concealed MANPADS team, then scramble Kabul's MiG-29A alert pair."
+        "concealed MANPADS team, and release Kabul's MiG-29 and MiG-23 alert pairs."
     )
     start_time = datetime(2026, 10, 20, 9, 0, tzinfo=timezone.utc)
     weather = Weather(
@@ -123,12 +129,25 @@ class BagramConvoyAmbush(MissionBuilder):
         convoy = self._spawn_convoy(m, russia, convoy_route)
         manpads = self._spawn_manpads(m, russia, convoy_route)
         migs = self._spawn_migs(m, russia, kabul, convoy_route.waypoints[0])
+        mig23s = self._spawn_mig23s(m, russia, kabul, convoy_route.waypoints[0])
         self._spawn_magic(m, usa, bagram)
         self._spawn_player(m, usa, bagram, convoy_route)
-        self._add_escalation_triggers(m, convoy, manpads, migs)
+        self._add_escalation_triggers(m, convoy, manpads, migs, mig23s)
         self._draw_plan(plan, bagram, convoy_route)
 
         return Assembled(scene.overlay)
+
+    def _finish_briefing(self, m: Mission, plan: PlanOverlay, out: Assembled) -> None:
+        """Keep the MiG-23 comparison flight visible while concealing other enemies."""
+        super()._finish_briefing(m, plan, out)
+        mig23s = next(
+            group
+            for group in m.country("Russia").plane_group
+            if group.name == _MIG23_TEST_GROUP_NAME
+        )
+        mig23s.hidden = False
+        mig23s.hidden_on_planner = False
+        mig23s.hidden_on_mfd = False
 
     def _spawn_convoy(
         self, m: Mission, russia: Country, route: ConvoyRoute
@@ -190,38 +209,66 @@ class BagramConvoyAmbush(MissionBuilder):
     def _spawn_migs(
         self, m: Mission, russia: Country, kabul: Airport, convoy_start
     ) -> FlyingGroup:
-        """Kabul's two-ship MiG-29A alert section, cold until the convoy dies."""
+        """Kabul's hidden runway-alert pair, activated below the convoy threshold."""
         migs = m.flight_group_from_airport(
             country=russia,
             name="Viper",
             aircraft_type=planes.MiG_29A,
             airport=kabul,
             maintask=task.CAP,
-            # `scramble_on_trigger` pushes DCS's engine-start command. The
-            # alert pair must therefore be a cold-ramp group; a hot-ramp group
-            # can ignore the uncontrolled hold and launch at mission start.
-            start_type=StartType.Cold,
+            # ActivateGroup reveals the section below the convoy-life threshold.
+            # A runway start means it appears ready to launch without an
+            # Uncontrolled/StartCommand sequence to manage.
+            start_type=StartType.Runway,
             group_size=2,
         )
-        migs.add_runway_waypoint(kabul)
+        migs.late_activation = True
+        self._route_cap_interceptor(migs, kabul, convoy_start)
+        arm(migs, planes.MiG_29A, _MIG_STORES)
+        set_skill(migs, Skill.Average)
+        apply_ai_difficulty(migs, self.difficulty)
+        return migs
+
+    def _spawn_mig23s(
+        self, m: Mission, russia: Country, kabul: Airport, convoy_start
+    ) -> FlyingGroup:
+        """Visible warm-ramp test pair held by the original scramble mechanism."""
+        mig23s = m.flight_group_from_airport(
+            country=russia,
+            name=_MIG23_TEST_GROUP_NAME,
+            aircraft_type=planes.MiG_23MLD,
+            airport=kabul,
+            maintask=task.CAP,
+            start_type=StartType.Warm,
+            group_size=2,
+        )
+        # Intentionally no late activation: this pair is on Kabul's ramp from
+        # mission start so the StartCommand/AITaskPush path is observable.
+        self._route_cap_interceptor(mig23s, kabul, convoy_start)
+        arm(mig23s, planes.MiG_23MLD, _MIG23_TEST_STORES)
+        set_skill(mig23s, Skill.Average)
+        apply_ai_difficulty(mig23s, self.difficulty)
+        return mig23s
+
+    def _route_cap_interceptor(
+        self, group: FlyingGroup, kabul: Airport, convoy_start
+    ) -> None:
+        """Give both alert pairs the same 90 km CAP intercept and recovery route."""
+        group.add_runway_waypoint(kabul)
         # A CAP maintask alone does not make this a reacting intercept flight:
         # give the alert pair the same air-engagement task that pydcs's
         # `intercept_flight` helper installs.  Otherwise the pair can launch
         # on the trigger, fly its route, and never commit to Razor.
-        migs.points[0].tasks[0] = task.EngageTargets(90_000, [task.Targets.All.Air])
+        group.points[0].tasks[0] = task.EngageTargets(90_000, [task.Targets.All.Air])
         intercept = offset(convoy_start, east_m=-8_000, north_m=-5_000)
-        migs.add_waypoint(
+        group.add_waypoint(
             intercept,
             altitude=_MIG_ALTITUDE_M,
             speed=_MIG_SPEED_KPH,
             name="INTERCEPT",
         )
-        migs.add_runway_waypoint(kabul)
-        migs.land_at(kabul)
-        arm(migs, planes.MiG_29A, _MIG_STORES)
-        set_skill(migs, Skill.Average)
-        apply_ai_difficulty(migs, self.difficulty)
-        return migs
+        group.add_runway_waypoint(kabul)
+        group.land_at(kabul)
 
     def _spawn_magic(self, m: Mission, usa: Country, bagram: Airport) -> None:
         """Magic E-3A already on station west of Bagram, watching the route."""
@@ -280,9 +327,14 @@ class BagramConvoyAmbush(MissionBuilder):
         return sections
 
     def _add_escalation_triggers(
-        self, m: Mission, convoy: VehicleGroup, manpads: VehicleGroup, migs: FlyingGroup
+        self,
+        m: Mission,
+        convoy: VehicleGroup,
+        manpads: VehicleGroup,
+        migs: FlyingGroup,
+        mig23s: FlyingGroup,
     ) -> None:
-        """Activate the ambush on the lead kill and scramble MiGs on the frag."""
+        """Activate MANPADS on lead kill and compare both fighter launch methods."""
         lead = convoy.units[0].id
         manpads_trigger = triggers.TriggerOnce(comment="MANPADS activate on lead kill")
         manpads_trigger.add_condition(condition.UnitDead(lead))
@@ -298,20 +350,29 @@ class BagramConvoyAmbush(MissionBuilder):
             ),
         )
 
+        mig_trigger = triggers.TriggerOnce(
+            comment="Activate Kabul MiG-29s when convoy is mostly destroyed"
+        )
+        # GroupDead is too strict here: it waits for every truck to be killed.
+        # GroupLifeLess measures remaining group health, not vehicle count.
+        mig_trigger.add_condition(condition.GroupLifeLess(convoy.id, 50))
+        mig_trigger.add_action(action.ActivateGroup(migs.id))
+        m.triggerrules.triggers.append(mig_trigger)
         scramble_on_trigger(
             m,
-            migs,
-            condition.GroupDead(convoy.id),
-            comment="Kabul MiG-29 scramble",
+            mig23s,
+            condition.GroupLifeLess(convoy.id, 50),
+            comment="Kabul MiG-23 scramble on convoy damage",
         )
         self._message(
             m,
             comment="MiG scramble warning",
-            conditions=(condition.GroupDead(convoy.id),),
+            conditions=(condition.GroupLifeLess(convoy.id, 50),),
             text=(
-                "Magic: Razor, Kabul has launched two MiG-29s. They are "
-                "vectoring north-east toward your egress. AIM-120Cs and AIM-9Xs "
-                "are available; defend yourselves and recover at Bagram."
+                "Magic: Razor, the convoy is heavily damaged. Both Kabul alert "
+                "pairs are launching: two MiG-29s and two MiG-23s. They are "
+                "vectoring north-east toward your egress; defend yourselves and "
+                "recover at Bagram."
             ),
             seconds=20,
         )
@@ -358,9 +419,13 @@ MISSION
 
 THREATS
   A concealed SA-18 MANPADS team activates when the convoy lead is hit.
-  Destroying the whole convoy triggers a two-ship MiG-29A scramble from Kabul.
-  Magic E-3A is already on station west of Bagram on {_MAGIC_FREQUENCY_MHZ}.000 AM
-  and will call the scramble.
+  Below 50% convoy life, Kabul releases two pairs: a runway MiG-29A pair by
+  group activation and a warm-start MiG-23MLD pair by the original scramble
+  trigger. The MiG-23s are intentionally visible on the F10 map from mission
+  start; their uncontrolled StartCommand/AITaskPush launch path is the test.
+  Both pairs fly the same 90 km CAP intercept. The MiG-23s carry R-24T and
+  R-60M infrared missiles. Magic is on station west of Bagram on
+  {_MAGIC_FREQUENCY_MHZ}.000 AM and calls the launch.
 
 LOADOUT
 {self.loadout_brief("Razor", _HORNET_FITS)}
@@ -370,8 +435,8 @@ LOADOUT
 ROUTE
   BAGRAM → PUSH → CONVOY → EGRESS → BAGRAM
   Destroy the convoy with the cluster bombs, then use the radar/IR missiles to
-  defend the egress if the MiGs press. The MiGs are a threat to survive, not a
-  separate strike target.
+  defend the egress if the MiGs press. The fighters are a threat to survive,
+  not a separate strike target.
 """
 
     def readme(self) -> str:
@@ -395,9 +460,14 @@ wingtips, with six **AIM-120Cs** for the MiG response.
 ## Escalation
 
 - Destroying the **lead vehicle** activates a concealed SA-18 MANPADS team.
-- Destroying the **whole convoy** scrambles two MiG-29As from Kabul.
+- Below **50% convoy group life**, Kabul launches two MiG-29As by late runway
+  activation and releases two warm-start MiG-23MLDs through the original
+  `scramble_on_trigger` sequence. The MiG-23 test pair is deliberately visible
+  on the F10/planner map from mission start and carries R-24T/R-60M IR missiles.
+- Both pairs use the same CAP task, 90 km air-engagement range, and intercept
+  route so the launch mechanism is the variable under test.
 - **Magic** is already orbiting west of Bagram on **{_MAGIC_FREQUENCY_MHZ}.000 AM**
-  and calls the scramble.
+  and calls when the threshold is reached.
 
 The convoy is the required target. The MiGs are the egress threat; fight them
 only if they prevent a safe recovery at Bagram.

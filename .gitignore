@@ -10,6 +10,8 @@ dist/
 *.egg-info/
 out/
 *.miz
+*.rar
+*.zip
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
