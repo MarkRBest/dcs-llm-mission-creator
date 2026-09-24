@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from dcs_mission_creator.core.tts.backend import VoiceBackend
+from dcs_mission_creator.core.tts.piper import DEFAULT_VOICE, PiperBackend
 from dcs_mission_creator.core.tts.synth import VoiceSynth
 
 
@@ -41,6 +42,11 @@ class EmptyBackend:
 
 def test_fake_backend_satisfies_protocol():
     assert isinstance(FakeBackend(), VoiceBackend)
+
+
+def test_piper_defaults_to_joe_medium():
+    assert DEFAULT_VOICE == "en_US-joe-medium"
+    assert PiperBackend().voice == "en_US-joe-medium"
 
 
 def test_render_cache_miss_calls_backend_once(tmp_path: Path):

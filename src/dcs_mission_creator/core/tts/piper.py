@@ -4,7 +4,7 @@ Wraps [piper1-gpl](https://github.com/OHF-voice/piper1-gpl) — a fast, local,
 neural ONNX-based TTS engine. CPU-friendly, sub-realtime on a laptop, no
 GPU required. Voice models are downloaded from HuggingFace on first use.
 
-Default voice: `en_US-danny-low` (neutral US male, narrator-grade).
+Default voice: `en_US-joe-medium` (US English male).
 Pass a different `voice` string to use any of the voices listed at
 https://huggingface.co/rhasspy/piper-voices (e.g. `en_GB-alan-medium`,
 `en_US-ryan-high`).
@@ -20,7 +20,7 @@ import structlog
 
 log = structlog.get_logger(__name__)
 
-DEFAULT_VOICE = "en_US-danny-low"
+DEFAULT_VOICE = "en_US-joe-medium"
 _DEFAULT_MODEL_DIR = Path("cache") / "voice" / "models"
 
 
@@ -30,7 +30,7 @@ class PiperBackend:
 
     Args:
         voice: Piper voice name in the form ``<lang>-<name>-<quality>``
-            (e.g. ``en_US-danny-low``). Downloaded on first use.
+            (e.g. ``en_US-joe-medium``). Downloaded on first use.
         model_dir: where to store/find the `.onnx` and `.onnx.json` files.
             Default: ``cache/voice/models/`` at the project root.
         length_scale: speech rate multiplier; >1.0 = slower, <1.0 = faster.
