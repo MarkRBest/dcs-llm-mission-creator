@@ -1,4 +1,4 @@
-"""Afghanistan ``Bagram Wildcard`` — a replayable ten-aircraft fighter sweep.
+"""Afghanistan ``Bagram Wildcard`` — a replayable eight-aircraft fighter sweep.
 
 Razor is one player F/A-18C and one AI wingman, hot at Bagram with identical
 ten-AMRAAM fits.  Magic is already airborne west of the field.  Crossing the
@@ -6,10 +6,10 @@ push line makes DCS choose one of eight complete adversary packages at runtime,
 so replaying the *same* ``.miz`` changes the aircraft, group sizes, approach
 axes, missile fits and pilot quality rather than merely changing a Python build.
 
-Each package contains exactly ten aircraft in five one-to-three-ship waves.
+Each package contains exactly eight aircraft in five one-to-three-ship waves.
 The next wave is released only after the current one has been destroyed, plus
 a short reset interval; the sortie is therefore a spaced fighter gauntlet, not
-one ten-aircraft furball.  The extremes are an all-MiG-23 package and an
+one eight-aircraft furball.  The extremes are an all-MiG-23 package and an
 all-Su-33 package, with six mixed packages between them.
 """
 
@@ -223,7 +223,7 @@ def _b(
     return _Bandit(aircraft, size, fit, skill, behavior, spawn, altitude_m)
 
 
-# Every row sums to exactly ten aircraft.  The first two are intentional edge
+# Every row sums to exactly eight aircraft.  The first two are intentional edge
 # cases; the remaining rows mix generations, seekers, pilot skill and geometry.
 _PACKAGES = (
     (
@@ -255,17 +255,17 @@ _PACKAGES = (
             3,
             6_800,
         ),
-        _b(planes.MiG_23MLD, 3, _MIG23_RADAR, Skill.Good, Difficulty.TRAINED, 4, 8_200),
+        _b(planes.MiG_23MLD, 1, _MIG23_RADAR, Skill.Good, Difficulty.TRAINED, 4, 8_200),
     ),
     (
         _b(planes.Su_33, 2, _SU33_SEMI, Skill.High, Difficulty.VETERAN, 1, 9_000),
-        _b(planes.Su_33, 2, _SU33_IR, Skill.Excellent, Difficulty.ACE, 3, 8_200),
+        _b(planes.Su_33, 1, _SU33_IR, Skill.Excellent, Difficulty.ACE, 3, 8_200),
         _b(planes.Su_33, 2, _SU33_SEMI, Skill.Excellent, Difficulty.ACE, 0, 9_500),
-        _b(planes.Su_33, 2, _SU33_IR, Skill.High, Difficulty.VETERAN, 2, 8_800),
+        _b(planes.Su_33, 1, _SU33_IR, Skill.High, Difficulty.VETERAN, 2, 8_800),
         _b(planes.Su_33, 2, _SU33_SEMI, Skill.Excellent, Difficulty.ACE, 4, 9_200),
     ),
     (
-        _b(planes.MiG_29A, 3, _MIG29A_SEMI, Skill.Good, Difficulty.TRAINED, 2, 8_000),
+        _b(planes.MiG_29A, 2, _MIG29A_SEMI, Skill.Good, Difficulty.TRAINED, 2, 8_000),
         _b(planes.Su_34, 1, _SU34_ACTIVE, Skill.Random, Difficulty.VETERAN, 0, 9_200),
         _b(planes.MiG_29S, 2, _MIG29S_ACTIVE, Skill.High, Difficulty.VETERAN, 3, 8_600),
         _b(
@@ -277,13 +277,13 @@ _PACKAGES = (
             4,
             6_700,
         ),
-        _b(planes.Su_33, 3, _SU33_IR, Skill.High, Difficulty.VETERAN, 1, 9_000),
+        _b(planes.Su_33, 2, _SU33_IR, Skill.High, Difficulty.VETERAN, 1, 9_000),
     ),
     (
         _b(planes.Su_34, 1, _SU34_ACTIVE, Skill.Good, Difficulty.TRAINED, 3, 8_500),
         _b(
             planes.MiG_23MLD,
-            3,
+            2,
             _MIG23_RADAR,
             Skill.Random,
             Difficulty.RECRUIT,
@@ -291,7 +291,7 @@ _PACKAGES = (
             7_000,
         ),
         _b(planes.Su_27, 2, _SU27_IR, Skill.High, Difficulty.VETERAN, 4, 9_000),
-        _b(planes.MiG_29S, 3, _MIG29S_ACTIVE, Skill.Good, Difficulty.TRAINED, 2, 8_200),
+        _b(planes.MiG_29S, 2, _MIG29S_ACTIVE, Skill.Good, Difficulty.TRAINED, 2, 8_200),
         _b(planes.MiG_29A, 1, _MIG29A_SEMI, Skill.Excellent, Difficulty.ACE, 1, 9_300),
     ),
     (
@@ -305,19 +305,19 @@ _PACKAGES = (
             3,
             6_600,
         ),
-        _b(planes.Su_33, 3, _SU33_SEMI, Skill.Random, Difficulty.VETERAN, 4, 9_400),
+        _b(planes.Su_33, 2, _SU33_SEMI, Skill.Random, Difficulty.VETERAN, 4, 9_400),
         _b(planes.Su_34, 2, _SU34_ACTIVE, Skill.Good, Difficulty.TRAINED, 0, 8_300),
-        _b(planes.MiG_29A, 2, _MIG29A_SEMI, Skill.High, Difficulty.VETERAN, 2, 8_700),
+        _b(planes.MiG_29A, 1, _MIG29A_SEMI, Skill.High, Difficulty.VETERAN, 2, 8_700),
     ),
     (
-        _b(planes.Su_27, 3, _SU27_IR, Skill.Good, Difficulty.TRAINED, 4, 8_500),
+        _b(planes.Su_27, 2, _SU27_IR, Skill.Good, Difficulty.TRAINED, 4, 8_500),
         _b(
             planes.MiG_29S, 2, _MIG29S_ACTIVE, Skill.Excellent, Difficulty.ACE, 2, 9_300
         ),
         _b(planes.Su_34, 1, _SU34_ACTIVE, Skill.Random, Difficulty.TRAINED, 0, 8_000),
         _b(
             planes.MiG_23MLD,
-            3,
+            2,
             _MIG23_RADAR,
             Skill.Average,
             Difficulty.RECRUIT,
@@ -329,9 +329,9 @@ _PACKAGES = (
     (
         _b(planes.MiG_23MLD, 1, _MIG23_MIXED, Skill.Good, Difficulty.TRAINED, 0, 7_000),
         _b(planes.Su_34, 1, _SU34_ACTIVE, Skill.High, Difficulty.VETERAN, 3, 9_000),
-        _b(planes.MiG_29A, 3, _MIG29A_SEMI, Skill.Random, Difficulty.TRAINED, 1, 8_100),
+        _b(planes.MiG_29A, 2, _MIG29A_SEMI, Skill.Random, Difficulty.TRAINED, 1, 8_100),
         _b(planes.Su_33, 2, _SU33_SEMI, Skill.Excellent, Difficulty.ACE, 4, 9_500),
-        _b(planes.MiG_29S, 3, _MIG29S_ACTIVE, Skill.High, Difficulty.VETERAN, 2, 8_700),
+        _b(planes.MiG_29S, 2, _MIG29S_ACTIVE, Skill.High, Difficulty.VETERAN, 2, 8_700),
     ),
     (
         _b(planes.Su_33, 2, _SU33_IR, Skill.High, Difficulty.VETERAN, 2, 9_000),
@@ -346,7 +346,7 @@ _PACKAGES = (
             1,
             6_800,
         ),
-        _b(planes.Su_27, 3, _SU27_IR, Skill.Excellent, Difficulty.ACE, 4, 9_600),
+        _b(planes.Su_27, 1, _SU27_IR, Skill.Excellent, Difficulty.ACE, 4, 9_600),
     ),
 )
 
@@ -370,11 +370,11 @@ class BagramWildcard(MissionBuilder):
     difficulty = Difficulty.TRAINED
     terrain = Afghanistan
     blue_task = (
-        "Take Razor to the north-eastern Bagram CAP box and clear approximately "
-        "ten hostile aircraft under Magic control; composition and axes are unknown."
+        "Take Razor to the north-eastern Bagram CAP box and clear eight hostile "
+        "aircraft under Magic control; composition and axes are unknown."
     )
     red_task = (
-        "Commit one dispersed ten-aircraft composite package in successive waves, "
+        "Commit one dispersed eight-aircraft composite package in successive waves, "
         "deny the Bagram fighter corridor, then withdraw surviving aircraft south."
     )
     start_time = datetime(2026, 10, 23, 10, 20, tzinfo=timezone.utc)
@@ -434,7 +434,7 @@ class BagramWildcard(MissionBuilder):
             group_size=2,
         )
         razor.units[0].skill = Skill.Player
-        razor.units[1].skill = Skill.High
+        razor.units[1].skill = Skill.Excellent
         for unit in razor.units:
             loadout.arm_unit(unit, planes.FA_18C_hornet, _HORNET_FIT.stores)
         loadout.record(m, "Razor", _HORNET_FITS)
@@ -627,8 +627,8 @@ class BagramWildcard(MissionBuilder):
             voice=self._voice,
             text=(
                 "Magic: Razor, picture is clean for now. Push north-east and I "
-                "will call each hostile commitment. Expect about ten aircraft, "
-                "but type, count and axis are uncertain."
+                "will call each hostile commitment. Expect eight aircraft, but "
+                "type and axis are uncertain."
             ),
         )
         mission_triggers.message_to_all(
@@ -717,8 +717,8 @@ class BagramWildcard(MissionBuilder):
 ===============================================================
 MISSION
   Razor launches hot from Bagram for a fighter sweep north-east of the field.
-  Overnight collection indicates a Russian composite package of approximately
-  ten aircraft dispersed among several corridors. Composition, group size,
+  Overnight collection indicates a Russian composite package of eight aircraft
+  dispersed among several corridors. Composition, group size,
   missile fit, pilot quality and approach direction are unresolved.
 
 EXECUTION
@@ -730,7 +730,7 @@ EXECUTION
 LOADOUT
 {self.loadout_brief("Razor", _HORNET_FITS)}
   Both aircraft carry the same fit: ten AIM-120C, two AIM-9X and one centerline
-  tank. Lead is the player; Razor two is a High-skill AI wingman.
+  tank. Lead is the player; Razor two is an Excellent (Ace-level) AI wingman.
 
 CONTROL / ROE
   Magic E-3A: {_MAGIC_FREQUENCY_MHZ}.000 AM, already airborne west of Bagram.
@@ -747,13 +747,13 @@ FALL-BACK
 
 ## Mission
 
-Launch **hot** from **Bagram** as one player F/A-18C lead with one **High-skill
-AI wingman**. Magic is already airborne west of Bagram on
+Launch **hot** from **Bagram** as one player F/A-18C lead with one **Excellent
+(Ace-level) AI wingman**. Magic is already airborne west of Bagram on
 **{_MAGIC_FREQUENCY_MHZ}.000 AM**.
 
 Crossing the push line commits one of **eight adversary packages selected by DCS
 at mission runtime**. The same `.miz` therefore plays differently on repeat
-sorties. Every package contains exactly **ten aircraft**, delivered in five
+sorties. Every package contains exactly **eight aircraft**, delivered in five
 spaced waves of one to three aircraft; aircraft type, approach axis, missile
 fit and pilot quality vary. The range runs from an all-MiG-23 package to an
 all-Su-33 package, with MiG-29A/S, Su-27 and Su-34 mixtures between them.
@@ -774,7 +774,7 @@ AMRAAMs stations 4/6, the tank station 5, and the AIM-9Xs the wingtips.
 BAGRAM → PUSH → CAP → EGRESS → BAGRAM
 ```
 
-Destroy all ten committed aircraft. Magic announces when the fighter corridor
+Destroy all eight committed aircraft. Magic announces when the fighter corridor
 is clear. The next group does not release until the current one has been
 destroyed and the 75-second reset has elapsed.
 
