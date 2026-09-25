@@ -69,26 +69,28 @@ _ROAD_ANCHORS = (
 _HORNET_FIT = Loadout(
     role="SCUD strike",
     carries=(
-        "four Mk-82 bombs, two AGM-65F IR Mavericks, two AIM-120Cs, "
+        "two 2,000 lb Mk-84 bombs, two AGM-65F IR Mavericks, two AIM-120Cs, "
         "two AIM-9Ms, and one 330-gallon centerline tank"
     ),
     stores=(
         (1, "AIM_9M_Sidewinder_IR_AAM"),
-        (2, "BRU_33_with_2_x_Mk_82___500lb_GP_Bomb_LD"),
+        (2, "Mk_84___2000lb_GP_Bomb_LD"),
         (3, "LAU_117_AGM_65F"),
         (4, "AIM_120C_AMRAAM___Active_Radar_AAM"),
         (5, "FPU_8A_Fuel_Tank_330_gallons"),
         (6, "AIM_120C_AMRAAM___Active_Radar_AAM"),
         (7, "LAU_117_AGM_65F"),
-        (8, "BRU_33_with_2_x_Mk_82___500lb_GP_Bomb_LD"),
+        (8, "Mk_84___2000lb_GP_Bomb_LD"),
         (9, "AIM_9M_Sidewinder_IR_AAM"),
     ),
 )
 _HORNET_FITS = (_HORNET_FIT, _HORNET_FIT)
 
 _MIG_STORES = (
+    (2, "R_24R__AA_7_Apex_SA____Semi_Act_Rdr"),
     (3, "APU_60_1M_with_R_60M__AA_8_Aphid_B____IR_AAM_"),
     (5, "APU_60_1M_with_R_60M__AA_8_Aphid_B____IR_AAM_"),
+    (6, "R_24T__AA_7_Apex_IR____Infra_Red"),
 )
 
 
@@ -102,7 +104,8 @@ class ScudHunt(MissionBuilder):
     blue_task = (
         "Find and destroy both Scud-B launchers north of Bandar Abbas before "
         "their 40-minute launch window closes. Their site or movement state "
-        "changes at runtime. Expect a heat-seeking MiG-23 response."
+        "changes at runtime. Expect MiG-23s armed with radar-guided and "
+        "heat-seeking missiles."
     )
     red_task = (
         "Move or conceal the Scud launchers in the Bandar Abbas corridor. "
@@ -281,7 +284,7 @@ class ScudHunt(MissionBuilder):
             name="INTERCEPT",
         )
         loadout.arm_group(migs, planes.MiG_23MLD, _MIG_STORES)
-        set_skill(migs, Skill.Average)
+        set_skill(migs, Skill.High)
         apply_ai_difficulty(migs, self.difficulty)
         return migs
 
@@ -297,6 +300,7 @@ class ScudHunt(MissionBuilder):
         m.triggerrules.triggers.append(chooser)
 
         for target in targets:
+            cue = self._site_cue(target.sector, target.state)
             message_to_coalition(
                 m,
                 comment=f"Control reports {target.sector} Scud intelligence",
@@ -305,7 +309,7 @@ class ScudHunt(MissionBuilder):
                     condition.TimeAfter(seconds=25),
                 ),
                 voice=self._voice,
-                text=self._site_cue(target.sector, target.state),
+                text=cue,
                 seconds=20,
             )
             release = triggers.TriggerOnce(
@@ -329,7 +333,8 @@ class ScudHunt(MissionBuilder):
             "Bandar Abbas. Two Scud launchers are the frag. Site and movement "
             "state are randomized each run; destroy both within forty minutes. "
             "A two-ship MiG-23 response may commit inside the search area. "
-            "Their R-60s are infrared only. Recover at Khasab."
+            "Each MiG carries one radar-guided R-24R, one infrared R-24T, "
+            "and two infrared R-60s. Recover at Khasab."
         )
         from dcs_mission_creator.core.triggers import intro
 
@@ -355,8 +360,9 @@ class ScudHunt(MissionBuilder):
             name=f"{target.sector.title()} Scud search area",
         )
         text = (
-            f"Khasab Control: Razor, two MiG-23s are airborne near the {target.sector} sector. "
-            "Heat-seeking R-60s only; the pair is closing on your position."
+            f"Khasab Control: Razor, two MiG-23s are airborne near the "
+            f"{target.sector} sector. They carry radar-guided and heat-seeking "
+            "missiles; the pair is closing on your position."
         )
         response = triggers.TriggerOnce(
             comment=f"Release {target.sector} airborne MiG-23 pair"
@@ -368,7 +374,12 @@ class ScudHunt(MissionBuilder):
         response.add_action(
             action.MessageToCoalition(action.Coalition.Blue, m.string(text), seconds=20)
         )
-        self._voice.attach_to_coalition(m, response, text, coalition="blue")
+        self._voice.attach_to_coalition(
+            m,
+            response,
+            text,
+            coalition="blue",
+        )
         m.triggerrules.triggers.append(response)
 
     def _add_target_outcome(self, m: Mission, target: _TargetOption) -> None:
@@ -461,16 +472,16 @@ FLIGHT
 
 LOADOUT
 {self.loadout_brief("Razor", _HORNET_FITS)}
-  Both Hornets carry four Mk-82s, two AGM-65F IR Mavericks, two AIM-120Cs,
+  Both Hornets carry two 2,000 lb Mk-84s, two AGM-65F IR Mavericks, two AIM-120Cs,
   two AIM-9Ms, and one 330-gallon centerline tank. Use Mavericks against
-  launchers on the move; Mk-82s are available for parked launchers.
+  launchers on the move; Mk-84s are available for parked launchers.
 
 THREAT / ROE
   A two-ship MiG-23 patrol activates when Razor enters the selected search
-  area. Each carries two R-60M infrared missiles and no radar-guided weapons.
-  Keep the search focused on the two TELs; avoid unnecessary strikes near
-  settlements. No surface-to-air missile belt is deployed in this training
-  version.
+  area. Each carries one R-24R semi-active radar missile, one R-24T infrared
+  missile, and two R-60M infrared missiles. Defend against both radar-guided
+  and heat-seeking shots. No surface-to-air missile belt is deployed in this
+  training version.
 
 TIMING
   The launch window closes 40 minutes after mission start; Control calls the
@@ -499,18 +510,18 @@ Both Hornets carry the same fit:
 
 {self.loadout_table("Razor", _HORNET_FITS)}
 
-This provides four Mk-82s for parked targets, two AGM-65F infrared Mavericks
-for standoff shots against moving TELs, two AIM-120Cs, two AIM-9Ms, and a
-330-gallon centerline tank. The stores were checked against the installed
+This provides two 2,000 lb Mk-84s for parked targets, two AGM-65F infrared
+Mavericks for standoff shots against moving TELs, two AIM-120Cs, two AIM-9Ms,
+and a 330-gallon centerline tank. The stores were checked against the installed
 F/A-18C module and ED's shipped payload stations.
 
 ## Opposition
 
 Entering the active search area releases a late-activated, already-airborne
-two-ship of MiG-23MLDs. They carry R-60M heat-seeking missiles only; no radar
-missiles or ground-based SAMs are included in this first, deliberately
-approachable version. Destroy the Scuds, defend if the MiGs commit, and recover
-at Khasab.
+two-ship of MiG-23MLDs. Each carries one R-24R semi-active radar missile, one
+R-24T infrared missile, and two R-60M heat-seeking missiles. No ground-based
+SAMs are deployed. Destroy the Scuds, defend if the MiGs commit, and recover at
+Khasab.
 
 ## Re-generate
 

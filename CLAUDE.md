@@ -254,8 +254,9 @@ of them holds policy: force composition, timings and text stay in the mission.
   `weather_for(m)` can build a different one.
 - [`core/triggers.py`](src/dcs_mission_creator/core/triggers.py) — the
   voice-plus-text radio call. **Use these instead of hand-rolling the rule**:
-  they take one `text` and use it for both the on-screen `MessageTo*` and the
-  TTS render, so the two cannot drift out of sync.
+  they use `text` for both the on-screen `MessageTo*` and the TTS render by
+  default. Pass `voice_text` only when speech needs a pronunciation spelling
+  that should not appear in the subtitle.
 
   ```python
   from dcs_mission_creator.core import triggers as mission_triggers
