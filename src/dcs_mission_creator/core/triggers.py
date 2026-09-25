@@ -1,15 +1,12 @@
 """Voice-plus-text trigger rules — the shape every mission writes twenty times.
 
 A radio call in this project is always the same six statements: make a rule,
-attach conditions, post the text on screen, render the same text as speech,
-append the rule. Missions carried roughly twenty hand-written copies of that
-between them.
+attach conditions, post the text on screen, render it as speech, append the rule.
+Missions carried roughly twenty hand-written copies of that between them.
 
-The reason to share it is not the line count. `VoiceSynth` renders whatever
-string it is handed, and the on-screen `MessageTo*` takes its own string, so
-the two are only identical because each call site passes the same variable
-twice. Taking **one** `text` makes the convention that they match word for word
-impossible to break by editing one and forgetting the other.
+The screen text and spoken text normally match. A call may pass `voice_text`
+when Piper needs pronunciation-friendly spellings that would look wrong in the
+subtitle.
 
 Everything a mission varies stays an argument: the conditions, the comment, how
 long the text sits on screen, which coalition hears it. Nothing here decides
@@ -34,9 +31,15 @@ Coalition = Literal["blue", "red"]
 _COALITION_ACTION = {"blue": action.Coalition.Blue, "red": action.Coalition.Red}
 
 
-def _attach(m: Mission, rule: TriggerRule, voice: VoiceSynth | None, text: str) -> None:
+def _attach(
+    m: Mission,
+    rule: TriggerRule,
+    voice: VoiceSynth | None,
+    text: str,
+    voice_text: str | None = None,
+) -> None:
     if voice is not None:
-        voice.attach_to_all(m, rule, text)
+        voice.attach_to_all(m, rule, text if voice_text is None else voice_text)
 
 
 def message_to_all(
@@ -46,6 +49,7 @@ def message_to_all(
     conditions: Iterable[Condition] = (),
     comment: str,
     voice: VoiceSynth | None = None,
+    voice_text: str | None = None,
     seconds: int = 20,
 ) -> triggers.TriggerOnce:
     """A one-shot call to everyone, spoken and printed, once `conditions` hold.
@@ -57,7 +61,7 @@ def message_to_all(
     for cond in conditions:
         rule.add_condition(cond)
     rule.add_action(action.MessageToAll(m.string(text), seconds=seconds))
-    _attach(m, rule, voice, text)
+    _attach(m, rule, voice, text, voice_text)
     m.triggerrules.triggers.append(rule)
     return rule
 
@@ -69,6 +73,7 @@ def message_to_coalition(
     conditions: Iterable[Condition] = (),
     comment: str,
     voice: VoiceSynth | None = None,
+    voice_text: str | None = None,
     coalition: Coalition = "blue",
     seconds: int = 15,
 ) -> triggers.TriggerOnce:
@@ -82,7 +87,12 @@ def message_to_coalition(
         )
     )
     if voice is not None:
-        voice.attach_to_coalition(m, rule, text, coalition=coalition)
+        voice.attach_to_coalition(
+            m,
+            rule,
+            text if voice_text is None else voice_text,
+            coalition=coalition,
+        )
     m.triggerrules.triggers.append(rule)
     return rule
 
@@ -94,6 +104,7 @@ def checkin(
     text: str,
     comment: str,
     voice: VoiceSynth | None = None,
+    voice_text: str | None = None,
     coalition: Coalition = "blue",
     seconds: int = 15,
 ) -> triggers.TriggerOnce:
@@ -104,6 +115,7 @@ def checkin(
         conditions=(condition.TimeAfter(seconds=at_seconds),),
         comment=comment,
         voice=voice,
+        voice_text=voice_text,
         coalition=coalition,
         seconds=seconds,
     )
@@ -115,6 +127,7 @@ def intro(
     text: str,
     comment: str,
     voice: VoiceSynth | None = None,
+    voice_text: str | None = None,
     coalition: Coalition = "blue",
     seconds: int = 25,
 ) -> triggers.TriggerStart:
@@ -130,6 +143,11 @@ def intro(
         )
     )
     if voice is not None:
-        voice.attach_to_coalition(m, rule, text, coalition=coalition)
+        voice.attach_to_coalition(
+            m,
+            rule,
+            text if voice_text is None else voice_text,
+            coalition=coalition,
+        )
     m.triggerrules.triggers.append(rule)
     return rule
