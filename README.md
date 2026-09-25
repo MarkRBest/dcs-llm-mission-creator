@@ -344,7 +344,7 @@ Mission scripts speak to the player through in-game audio triggers, not just tex
 ```python
 from dcs_mission_creator.core.tts import VoiceSynth
 
-tts = VoiceSynth()                                       # default: Piper, en_US-danny-low
+tts = VoiceSynth()                                       # default: Piper, en_US-joe-medium
 tts.attach_to_all(m, rule, "Bullseye 270 for 40, bandits hot.")
 tts.attach_to_coalition(m, rule, "Magic, picture clear.", coalition="blue")
 tts.attach_to_group(m, rule, "Dodge 1, RTB Batumi.", group_id=player.id)
