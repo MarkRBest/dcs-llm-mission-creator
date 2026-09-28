@@ -99,6 +99,7 @@ class ScudHunt(MissionBuilder):
 
     name = "scud_hunt"
     title = "Scud Hunt"
+    ground_speed_kph = _GROUND_SPEED_KPH
     difficulty = Difficulty.TRAINED
     terrain = PersianGulf
     blue_task = (
@@ -223,8 +224,8 @@ class ScudHunt(MissionBuilder):
             ),
         )
 
-    @staticmethod
     def _scud_group(
+        self,
         m: Mission,
         iran: Country,
         name: str,
@@ -257,7 +258,7 @@ class ScudHunt(MissionBuilder):
                 launchers.add_waypoint(
                     waypoint,
                     move_formation=PointAction.OnRoad,
-                    speed=_GROUND_SPEED_KPH,
+                    speed=self.ground_speed_kph,
                 )
         return launchers
 
@@ -328,21 +329,25 @@ class ScudHunt(MissionBuilder):
             self._add_target_outcome(m, target)
 
         self._add_clock(m, targets)
-        mission_start = (
+        mission_start = self._mission_start_message()
+        from dcs_mission_creator.core.triggers import intro
+
+        intro(
+            m,
+            comment=f"{self.title} mission brief",
+            voice=self._voice,
+            text=mission_start,
+        )
+
+    def _mission_start_message(self) -> str:
+        """Brief Razor on the randomized mix of parked and moving launchers."""
+        return (
             "Khasab Control: Razor, launch for a daylight search north of "
             "Bandar Abbas. Two Scud launchers are the frag. Site and movement "
             "state are randomized each run; destroy both within forty minutes. "
             "A two-ship MiG-23 response may commit inside the search area. "
             "Each MiG carries one radar-guided R-24R, one infrared R-24T, "
             "and two infrared R-60s. Recover at Khasab."
-        )
-        from dcs_mission_creator.core.triggers import intro
-
-        intro(
-            m,
-            comment="Scud Hunt mission brief",
-            voice=self._voice,
-            text=mission_start,
         )
 
     def _add_mig_trigger(

@@ -39,6 +39,7 @@ from dcs.terrain.caucasus.caucasus import Caucasus
 from dcs.terrain.terrain import Airport
 from dcs.unit import Skill
 from dcs.unitgroup import FlyingGroup, ShipGroup, StaticGroup, VehicleGroup
+from dcs.unittype import ShipType
 
 from dcs_mission_creator.core import (
     air_defense as ad,
@@ -431,7 +432,7 @@ class CoastalLantern(MissionBuilder):
         m: Mission,
         usa: Country,
         name: str,
-        ship_type: type,
+        ship_type: type[ShipType],
         position: Point,
         tacan: int,
         icls: int,
