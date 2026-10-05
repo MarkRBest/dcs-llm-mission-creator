@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from dcs.task import MainTask
     from dcs.terrain.terrain import Airport
     from dcs.unit import Unit
-    from dcs.unitgroup import FlyingGroup, Group
+    from dcs.unitgroup import FlyingGroup, Group, ShipGroup, StaticGroup
     from dcs.unittype import FlyingType
 
 __all__ = [
@@ -308,7 +308,7 @@ def player_flight_from_unit(
     country: Country,
     name: str,
     aircraft_type: type[FlyingType],
-    pad_group: Group,
+    pad_group: ShipGroup | StaticGroup,
     maintask: type[MainTask],
     start_type: StartType,
     slots: int,

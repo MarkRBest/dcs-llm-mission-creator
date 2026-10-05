@@ -141,9 +141,7 @@ class PiperBackend:
         ls = f"{self.length_scale:.2f}" if self.length_scale is not None else "def"
         ns = f"{self.noise_scale:.2f}" if self.noise_scale is not None else "def"
         nw = f"{self.noise_w:.2f}" if self.noise_w is not None else "def"
-        pronunciation_rules = repr(
-            (_MIG_MODEL_PATTERN.pattern, _PRONUNCIATION_ALIASES)
-        )
+        pronunciation_rules = repr((_MIG_MODEL_PATTERN.pattern, _PRONUNCIATION_ALIASES))
         aliases = hashlib.sha256(pronunciation_rules.encode("utf-8"))
         pronunciation_version = aliases.hexdigest()[:8]
         return f"piper|{self.voice}|{ls}|{ns}|{nw}|pron:{pronunciation_version}"

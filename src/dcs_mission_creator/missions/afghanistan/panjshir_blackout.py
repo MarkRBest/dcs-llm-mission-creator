@@ -103,9 +103,7 @@ _LEAD_FIT = Loadout(
 
 _WINGMAN_FIT = Loadout(
     role="AGM-88C x4",
-    carries=(
-        "four AGM-88C HARMs, one 330 gal tank, two AIM-9X and one AIM-120C"
-    ),
+    carries=("four AGM-88C HARMs, one 330 gal tank, two AIM-9X and one AIM-120C"),
     stores=(
         (1, "AIM_9X_Sidewinder_IR_AAM"),
         (2, "AGM_88C_HARM___High_Speed_Anti_Radiation_Missile_"),
@@ -213,9 +211,7 @@ class PanjshirBlackout(MissionBuilder):
             overlay=load_scene("afghanistan"),
         )
 
-    def _spawn_red(
-        self, m: Mission, russia: Country, scene: _Scene
-    ) -> _RedForces:
+    def _spawn_red(self, m: Mission, russia: Country, scene: _Scene) -> _RedForces:
         """Build the two belts, their point defence, EWR chain and objective."""
         ov = scene.overlay.overlay
         sa10 = templates.VehicleTemplate.Russia.sa10_site(
@@ -292,9 +288,7 @@ class PanjshirBlackout(MissionBuilder):
         # The stock template includes a rifleman.  Leaving him in the group
         # reduces the whole mobile battery to walking speed and defeats the
         # shoot-and-scoot behavior configured below.
-        buk.units = [
-            u for u in buk.units if u.type != vehicles.Infantry.Infantry_AK.id
-        ]
+        buk.units = [u for u in buk.units if u.type != vehicles.Infantry.Infantry_AK.id]
         return ad.disperse_site(
             buk,
             radius_m=420.0,
@@ -432,9 +426,7 @@ class PanjshirBlackout(MissionBuilder):
             terrain=self._terrain,
         )
 
-    def _arm_network(
-        self, m: Mission, red: _RedForces, magic: FlyingGroup
-    ) -> None:
+    def _arm_network(self, m: Mission, red: _RedForces, magic: FlyingGroup) -> None:
         """Wire every radar-guided battery into one cued, HARM-reactive net."""
         sites = [
             Site(
@@ -576,9 +568,7 @@ class PanjshirBlackout(MissionBuilder):
             plan.threat(pos, radius=4_000.0, label=label, icon=StandardIcon.SearchRadar)
         return briefed
 
-    def _add_triggers(
-        self, m: Mission, razor: FlyingGroup, bunkers: tuple
-    ) -> None:
+    def _add_triggers(self, m: Mission, razor: FlyingGroup, bunkers: tuple) -> None:
         mission_triggers.intro(
             m,
             comment="Razor mission brief",
@@ -609,9 +599,7 @@ class PanjshirBlackout(MissionBuilder):
                 condition.UnitAlive(bunkers[1].units[0].id),
             ),
             voice=self._voice,
-            text=(
-                "Magic: Razor is down and Grom remains operational. Abort the raid."
-            ),
+            text=("Magic: Razor is down and Grom remains operational. Abort the raid."),
             seconds=20,
         )
 
