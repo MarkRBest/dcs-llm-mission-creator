@@ -1105,9 +1105,9 @@ class CoastalLantern(MissionBuilder):
             comment="Operation Coastal Lantern opening picture",
             voice=self._voice,
             text=(
-                "Magic: Coastal Lantern is active. Fighter, SEAD, strike, CAS and helicopter taskings "
-                "are independent. The coastal IADS is networked and may shut down when threatened. "
-                "Choose the work your package can do; seven campaign points will break the position."
+                "Magic: Coastal Lantern active. Fighter, SEAD, strike, CAS and "
+                "helicopter tasks are independent. The IADS may shut down under "
+                "threat. Seven campaign points will break the position."
             ),
         )
 

@@ -255,8 +255,10 @@ of them holds policy: force composition, timings and text stay in the mission.
 - [`core/triggers.py`](src/dcs_mission_creator/core/triggers.py) — the
   voice-plus-text radio call. **Use these instead of hand-rolling the rule**:
   they use `text` for both the on-screen `MessageTo*` and the TTS render by
-  default. Pass `voice_text` only when speech needs a pronunciation spelling
-  that should not appear in the subtitle.
+  default. Write radio copy as one operational idea, preferably no more than 25
+  spoken words; split anything over 30. Pass `voice_text` when a subtitle needs
+  extra detail or speech needs a pronunciation spelling that should not appear
+  on screen.
 
   ```python
   from dcs_mission_creator.core import triggers as mission_triggers
@@ -990,9 +992,10 @@ and `core/lua/vendor/README.md`.*
 [`VoiceSynth`](src/dcs_mission_creator/core/tts/synth.py) renders TTS audio
 (Piper by default), caches WAVs to `cache/voice/`, registers them on
 `mission.map_resource`, and appends the right `SoundTo*` action to a trigger
-rule. Every mission instantiates one in `__init__` (`self._voice =
-VoiceSynth()`). Methods (text matches the on-screen `MessageTo*` body
-word-for-word):
+rule. Every mission gets one lazily from `MissionBuilder._voice`; its default
+Piper voice and rate come from `PIPER_VOICE` / `PIPER_LENGTH_SCALE` (the default
+length scale is 1.20; larger is slower). Methods use the on-screen `MessageTo*`
+body unless the trigger helper is given a concise `voice_text`:
 
 ```python
 self._voice.attach_to_all(m, rule, text)

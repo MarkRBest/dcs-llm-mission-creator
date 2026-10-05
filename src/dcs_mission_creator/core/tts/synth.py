@@ -37,7 +37,9 @@ class VoiceSynth:
         *,
         cache_dir: Path | None = None,
     ) -> None:
-        self.backend: VoiceBackend = backend or PiperBackend()
+        self.backend: VoiceBackend = (
+            backend if backend is not None else PiperBackend.from_environment()
+        )
         self.cache_dir = (cache_dir or _DEFAULT_CACHE).resolve()
 
     def _cache_path(self, text: str) -> Path:

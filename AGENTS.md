@@ -14,6 +14,17 @@ quality conventions.
 - Keep player-count, difficulty, briefing, map drawing, and DTC information
   consistent with the conventions documented in `CLAUDE.md`.
 
+## Radio calls
+
+- Write spoken radio traffic as radio traffic, not narrative prose: use direct
+  operational language, short declarative sentences, and one actionable idea
+  per transmission.
+- Prefer no more than 25 spoken words. Split calls over 30 words, or use a
+  concise `voice_text` when the on-screen message genuinely needs more detail.
+- Put the callsign and important action or threat first. Remove scene-setting,
+  repeated context, literary phrasing, and subordinate clauses that a pilot
+  cannot readily absorb under cockpit workload.
+
 ## Known mission pitfalls
 
 - The fighter scramble in `afghanistan/bagram_convoy_ambush.py` has repeatedly

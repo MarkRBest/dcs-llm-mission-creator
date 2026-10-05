@@ -12,7 +12,11 @@ from pathlib import Path
 import pytest
 
 from dcs_mission_creator.core.tts.backend import VoiceBackend
-from dcs_mission_creator.core.tts.piper import DEFAULT_VOICE, PiperBackend
+from dcs_mission_creator.core.tts.piper import (
+    DEFAULT_LENGTH_SCALE,
+    DEFAULT_VOICE,
+    PiperBackend,
+)
 from dcs_mission_creator.core.tts.synth import VoiceSynth
 
 
@@ -44,9 +48,30 @@ def test_fake_backend_satisfies_protocol():
     assert isinstance(FakeBackend(), VoiceBackend)
 
 
-def test_piper_defaults_to_joe_medium():
+def test_piper_defaults_to_slower_joe_medium():
     assert DEFAULT_VOICE == "en_US-joe-medium"
+    assert DEFAULT_LENGTH_SCALE == 1.20
     assert PiperBackend().voice == "en_US-joe-medium"
+    assert PiperBackend().length_scale == 1.20
+
+
+def test_default_voice_synth_reads_piper_environment(monkeypatch):
+    monkeypatch.setenv("PIPER_VOICE", "en_GB-alan-medium")
+    monkeypatch.setenv("PIPER_LENGTH_SCALE", "1.35")
+
+    synth = VoiceSynth()
+
+    assert isinstance(synth.backend, PiperBackend)
+    assert synth.backend.voice == "en_GB-alan-medium"
+    assert synth.backend.length_scale == 1.35
+
+
+@pytest.mark.parametrize("value", ["quickly", "0", "-1", "nan", "inf"])
+def test_piper_rejects_invalid_environment_rate(monkeypatch, value: str):
+    monkeypatch.setenv("PIPER_LENGTH_SCALE", value)
+
+    with pytest.raises(ValueError, match="PIPER_LENGTH_SCALE"):
+        PiperBackend.from_environment()
 
 
 def test_render_cache_miss_calls_backend_once(tmp_path: Path):
