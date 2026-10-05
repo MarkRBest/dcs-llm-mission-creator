@@ -1971,11 +1971,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Magic mission-start picture",
             voice=self._voice,
             text=(
-                "Dodge, Magic on station. Russian column rolling south down the "
-                "Inguri valley road, Hawg is fragged against it. The load is "
-                "behind it — fuel and ammunition, and that is yours. Pinpoint is "
-                "in the valley watching the road and will call it. Texaco is "
-                f"{_FREQ_TANKER} point zero, TACAN {_TANKER_TACAN}, west of the field."
+                "Dodge, Magic. Russian column southbound in the Inguri; Hawg has "
+                "it. Fuel detachment follows; that one is yours. Pinpoint will "
+                f"call it. Texaco {_FREQ_TANKER}, TACAN {_TANKER_TACAN}."
             ),
         )
 
@@ -1997,10 +1995,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Pinpoint 1-1 check-in",
             voice=self._voice,
             text=(
-                "Dodge, Pinpoint one-one. We are in the treeline above the valley "
-                "road with eyes on it. The lead column has gone past us. When the "
-                f"fuel comes down I will lase it for you on {_LASER_CODE}. My "
-                f"net is {_FREQ_TACP} point zero."
+                "Dodge, Pinpoint one-one. In the treeline above the valley road. "
+                "Lead column passed. I will lase the fuel detachment on "
+                f"{_LASER_CODE}. Net {_FREQ_TACP} decimal zero."
             ),
         )
 
@@ -2123,13 +2120,10 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.PartOfGroupInZone(pol.id, seen.id),),
             voice=self._voice,
             text=(
-                "Dodge, Pinpoint one-one. I have your target — two fuel bowsers "
-                "and an ammunition truck on the valley road, one armoured vehicle "
-                "with them, making about thirty-five. I am on them with the "
-                "laser. They will be in and out of my sight line for the next "
-                "quarter of an hour as the road weaves, and then they are behind "
-                "the spur for good — coordinates are on my net whenever you want "
-                "them."
+                "Dodge, Pinpoint one-one. Target in sight: two fuel bowsers, one "
+                "ammunition truck, one armoured escort, northbound at thirty-five. "
+                "Laser on; sight line intermittent. Coordinates available on my "
+                "net."
             ),
             seconds=20,
         )
@@ -2158,10 +2152,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.PartOfGroupInZone(pol.id, masked.id),),
             voice=self._voice,
             text=(
-                "Dodge, Pinpoint one-one. They are behind the spur — I have lost "
-                "the sight line and the spot is off. I can still give you "
-                "coordinates but the last few kilometres to the junction are your "
-                "pod, not my laser."
+                "Dodge, Pinpoint one-one. Target behind the spur; laser off. I can "
+                "give coordinates, but the final run to the junction is on your "
+                "pod."
             ),
             seconds=20,
         )
@@ -2191,10 +2184,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             ),
             voice=self._voice,
             text=(
-                "Dodge, Magic. New emitter with that detachment — Land Roll, "
-                "SA-8, and it is the one we could not find this morning. Short "
-                "reach and a low ceiling. Keep the release at six thousand and "
-                "you are over the top of it; go down to look and you are not."
+                "Dodge, Magic. New Land Roll emitter with the detachment: SA-8. "
+                "Stay above six thousand and release from there. Do not descend "
+                "to identify."
             ),
             seconds=20,
         )
@@ -2215,10 +2207,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.TimeSinceFlag(_FLAG_ECHELON_SEEN, _HIND_DELAY_S),),
             voice=self._voice,
             text=(
-                "Dodge, Magic. Two movers low in the Inguri valley, rotary, "
-                "tracking south toward Pinpoint's position. That is all we have "
-                "on them — they are in the clutter. If they get to him you lose "
-                "the laser."
+                "Dodge, Magic. Two helicopters low in the Inguri valley, heading "
+                "for Pinpoint. They are in the clutter. Protect him or lose the "
+                "laser."
             ),
             seconds=20,
         )
@@ -2238,10 +2229,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.GroupDead(tacp.id),),
             voice=self._voice,
             text=(
-                "Dodge, Magic. Pinpoint is off the air — we have lost the party in "
-                "the valley. No talk-on and no spot from here on. The detachment "
-                "is still yours: self-designate with the pod and fly the pass "
-                "yourself."
+                "Dodge, Magic. Pinpoint is off the air. No talk-on, no laser. The "
+                "detachment remains your target; self-designate with the pod."
             ),
             seconds=20,
         )
@@ -2282,9 +2271,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Gudauta Su-27 pair scramble",
         )
         call = (
-            "Dodge, Magic. Second pair starting engines at Gudauta, Su-27. Eagle "
-            "is committing on them — they are Eagle's, not yours. Finish the "
-            "detachment and go home; you are cleared to leave them flying."
+            "Dodge, Magic. Two Su-27s starting at Gudauta. Eagle is committing; "
+            "they are not your fight. Finish the detachment and head home."
         )
         trig.add_action(
             action.MessageToCoalition(action.Coalition.Blue, m.string(call), seconds=20)
@@ -2318,9 +2306,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.GroupLifeLess(red.convoy.id, 30),),
             voice=self._voice,
             text=(
-                "Magic: that column is finished as a fighting unit, nothing left "
-                "on the road worth calling a march. The fuel behind it is still "
-                "coming, Dodge — that one is yours."
+                "Magic: column combat-ineffective. Fuel detachment still inbound, "
+                "Dodge; that is your remaining target."
             ),
         )
         mission_triggers.message_to_all(
@@ -2329,9 +2316,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.GroupLifeLess(red.pol.id, 40),),
             voice=self._voice,
             text=(
-                "Magic: the bowsers are burning on the valley road. Whatever is "
-                "left of that column is walking pace from here on — there is no "
-                "fuel behind it."
+                "Magic: bowsers destroyed. The surviving column is out of fuel "
+                "and slowing on the valley road."
             ),
         )
         mission_triggers.message_to_all(
@@ -2362,9 +2348,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.PartOfGroupInZone(red.pol.id, junction.id),),
             voice=self._voice,
             text=(
-                "Magic: the fuel made the junction north of Senaki and they are "
-                "off-loading under cover. We missed that window. Dodge, work what "
-                "is left on the road and RTB Batumi."
+                "Magic: fuel reached the junction north of Senaki and is "
+                "unloading. Window missed. Dodge, attack remaining road targets "
+                "and RTB Batumi."
             ),
         )
         mission_triggers.message_to_all(
@@ -2376,9 +2362,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             ),
             voice=self._voice,
             text=(
-                "Magic: we have lost Hawg and the column is still rolling south. "
-                "The fuel behind it is still your frag, Dodge — nothing else here "
-                "can reach it."
+                "Magic: Hawg is down; column still moving south. Fuel detachment "
+                "remains your target, Dodge. No other friendly aircraft can reach "
+                "it."
             ),
         )
         # Not an outcome, a hand-off: the party being alive at the end is what

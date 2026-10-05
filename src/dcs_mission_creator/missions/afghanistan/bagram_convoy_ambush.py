@@ -369,10 +369,9 @@ class BagramConvoyAmbush(MissionBuilder):
             comment="MiG scramble warning",
             conditions=(condition.GroupLifeLess(convoy.id, 50),),
             text=(
-                "Magic: Razor, the convoy is heavily damaged. Both Kabul alert "
-                "pairs are launching: two MiG-29s and two MiG-23s. They are "
-                "vectoring north-east toward your egress; defend yourselves and "
-                "recover at Bagram."
+                "Magic: Razor, convoy heavily damaged. Both Kabul alert pairs are "
+                "launching: two MiG-29s and two MiG-23s. They are vectoring "
+                "north-east toward your egress. Defend yourselves; recover Bagram."
             ),
             seconds=20,
         )

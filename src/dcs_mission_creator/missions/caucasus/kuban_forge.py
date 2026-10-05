@@ -1897,11 +1897,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Magic mission-start picture",
             voice=self._voice,
             text=(
-                "Colt, Magic on station. Target is the motor works on the Kuban, "
-                "and it is the two casting halls, nothing else on that site. "
-                "Take Texaco before the coast, then fly the valleys — nothing "
-                "up there can see you until the Teberda opens. Ferret has been "
-                "on that ridge six days and will talk you on."
+                "Colt, Magic on station. Two casting halls at the Kuban motor "
+                "works are your target. Tank before the coast, then fly the "
+                "valleys. Ferret will talk you on."
             ),
         )
 
@@ -1921,9 +1919,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Texaco check-in",
             voice=self._voice,
             text=(
-                f"Texaco on station, {_FREQ_TANKER} point zero, TACAN "
-                f"{_TANKER_TACAN[:-1]} X-ray, north of Kutaisi. Colt, take your "
-                "gas before you turn north-west. You will not see me again."
+                f"Texaco, {_FREQ_TANKER} decimal zero, TACAN "
+                f"{_TANKER_TACAN[:-1]} X-ray, north of Kutaisi. Colt, take fuel "
+                "before turning north-west."
             ),
         )
         sanc.announce(m, home, at_seconds=_SANCTUARY_CHECKIN_S, voice=self._voice)
@@ -1933,9 +1931,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Ferret check-in",
             voice=self._voice,
             text=(
-                f"Ferret one-one on {_FREQ_RECON} point zero, eyes on the works. "
-                "Both halls are running and there is a load on transporters in "
-                f"the yard. Laser code {_LASER_CODE} when you want it."
+                f"Ferret one-one, {_FREQ_RECON} decimal zero. Both halls active; "
+                f"transporters loaded in the yard. Laser {_LASER_CODE} on request."
             ),
         )
 
@@ -2037,9 +2034,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         rule.add_condition(condition.PartOfCoalitionInZone("blue", zone.id))
         rule.add_action(action.ActivateGroup(shipment.id))
         call = (
-            "Ferret one-one: they have heard you. The transporters are out of "
-            "the yard and turning north up the Kuban road. Halls first, Colt — "
-            "I will hold a spot on the column when you are ready."
+            "Ferret one-one: transporters leaving the yard northbound on the "
+            "Kuban road. Halls first, Colt. I will hold the laser on the column."
         )
         rule.add_action(action.MessageToAll(m.string(call), seconds=20))
         self._voice.attach_to_all(m, rule, call)
@@ -2071,9 +2067,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.PartOfCoalitionInZone("blue", zone.id),),
             voice=self._voice,
             text=(
-                "Magic: Colt, that is the Gainful we never fixed — strong "
-                "emitter north of the bend and no fix on it. You are inside it. "
-                "Come south now, whatever is on that road."
+                "Magic: Colt, strong Gainful emitter north of the bend. No fix. "
+                "You are inside its envelope; turn south now."
             ),
             seconds=20,
         )
@@ -2124,9 +2119,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.UnitDead(hall),),
             voice=self._voice,
             text=(
-                "Magic: Colt, Mineralnye Vody is scrambling their alert section. "
-                "They will be over the Kuban in ten. Finish what you are doing "
-                "and climb out south-west, not back down the Teberda."
+                "Magic: Colt, alert fighters launching from Mineralnye Vody. Ten "
+                "minutes to the Kuban. Finish up and climb out south-west; avoid "
+                "the Teberda."
             ),
             seconds=20,
         )
@@ -2159,9 +2154,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=tuple(condition.UnitDead(unit) for unit in halls),
             voice=self._voice,
             text=(
-                "Magic: both casting halls are down. That works is finished, "
-                "Colt — nothing comes out of that valley now. Climb out "
-                "south-west and go home over the top."
+                "Magic: both casting halls down. Mission complete, Colt. Climb "
+                "out south-west and go home over the top."
             ),
             seconds=25,
         )

@@ -363,12 +363,26 @@ Three components:
 
 **Render cache.** WAVs live at `cache/voice/<sha256[:16]>.wav`. The fingerprint includes voice name + length/noise scales, so changing voice or rate invalidates entries without colliding. Re-running a generator after first build is offline and instant.
 
+The default Piper rate is deliberately slower than the voice model's stock
+cadence so short operational calls remain intelligible in the cockpit. Configure
+the default backend in `.env` (larger length scales are slower):
+
+```dotenv
+PIPER_VOICE=en_US-joe-medium
+PIPER_LENGTH_SCALE=1.20
+```
+
+Write voice lines as radio traffic rather than briefing prose: one operational
+idea per transmission, preferably no more than 25 spoken words. Split anything
+over 30 words, or pass a concise `voice_text=` when the on-screen message needs
+extra detail.
+
 **Swapping engines.** Implement `VoiceBackend` for Coqui, Kokoro, ElevenLabs, Azure, etc., then `VoiceSynth(backend=MyBackend(...))`. Default voice override:
 
 ```python
 from dcs_mission_creator.core.tts import PiperBackend, VoiceSynth
 
-tts = VoiceSynth(backend=PiperBackend(voice="en_GB-alan-medium", length_scale=1.05))
+tts = VoiceSynth(backend=PiperBackend(voice="en_GB-alan-medium", length_scale=1.20))
 ```
 
 # Adding a new mission

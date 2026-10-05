@@ -2335,10 +2335,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Magic intro picture",
             voice=self._voice,
             text=(
-                "Magic on station. Colt, picture: the Gammon behind Jableh is up "
-                "and has been all night. Two coastal batteries, Latakia and "
-                "Tartus, both cold. Your crossing is the water between them. "
-                "Stay under three hundred metres and they cannot touch you."
+                "Magic on station. Colt, Gammon behind Jableh is active. Latakia "
+                "and Tartus batteries are cold. Cross between them below three "
+                "hundred metres."
             ),
             seconds=25,
         )
@@ -2351,9 +2350,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Texaco check-in",
             voice=self._voice,
             text=(
-                "Texaco is established, two seven zero point zero, TACAN ten X. "
-                "Colt, take everything you can carry — it is a long way to the "
-                "beach and I will be here when you come back."
+                "Texaco established, two-seven-zero decimal zero, TACAN ten X. "
+                "Colt, take fuel before the coast; tanker remains on station for "
+                "recovery."
             ),
         )
 
@@ -2400,9 +2399,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         crossing.add_action(action.SetFlag(_FLAG_COAST_CROSSED))
         crossing.add_action(action.ActivateGroup(column.id))
         call = (
-            "Magic: the Baniyas radar has you across the beach, Colt. Assume "
-            "they are calling it in. Expect the alert pair off Hama and expect "
-            "the load-out to start rolling. Stay low and keep going."
+            "Magic: Baniyas radar has you, Colt. Expect Hama fighters and the "
+            "load-out to move. Stay low; keep going."
         )
         crossing.add_action(
             action.MessageToCoalition(action.Coalition.Blue, m.string(call), seconds=20)
@@ -2455,9 +2453,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         release.add_condition(condition.FlagIsTrue(_FLAG_PLANT_STRUCK))
         release.add_action(action.ActivateGroup(chevy.id))
         call = (
-            "Chevy pushing from the hold, feet dry in ten. We are going after the "
-            "column on the ridge road, low — nobody gets to climb out here. Colt, "
-            "get yourself over the water."
+            "Chevy pushing from the hold, feet dry in ten. We have the ridge-road "
+            "column. Colt, get over the water."
         )
         release.add_action(
             action.MessageToCoalition(action.Coalition.Blue, m.string(call), seconds=15)
@@ -2492,9 +2489,8 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             conditions=(condition.UnitDead(red.plant.hall.units[0].id),),
             voice=self._voice,
             text=(
-                "Magic: the casting hall is down. That is the mission, Colt — "
-                "they are not casting motors at Ansariyah this year. Egress west, "
-                "stay on the deck until you are outside the ring."
+                "Magic: casting hall down. Mission complete, Colt. Egress west; "
+                "stay on the deck until outside the ring."
             ),
             seconds=25,
         )

@@ -5,8 +5,8 @@ attach conditions, post the text on screen, render it as speech, append the rule
 Missions carried roughly twenty hand-written copies of that between them.
 
 The screen text and spoken text normally match. A call may pass `voice_text`
-when Piper needs pronunciation-friendly spellings that would look wrong in the
-subtitle.
+when the subtitle needs more detail than a concise radio transmission, or when
+Piper needs pronunciation-friendly spellings that would look wrong on screen.
 
 Everything a mission varies stays an argument: the conditions, the comment, how
 long the text sits on screen, which coalition hears it. Nothing here decides

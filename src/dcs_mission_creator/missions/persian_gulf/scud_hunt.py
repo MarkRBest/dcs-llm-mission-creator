@@ -342,12 +342,9 @@ class ScudHunt(MissionBuilder):
     def _mission_start_message(self) -> str:
         """Brief Razor on the randomized mix of parked and moving launchers."""
         return (
-            "Khasab Control: Razor, launch for a daylight search north of "
-            "Bandar Abbas. Two Scud launchers are the frag. Site and movement "
-            "state are randomized each run; destroy both within forty minutes. "
-            "A two-ship MiG-23 response may commit inside the search area. "
-            "Each MiG carries one radar-guided R-24R, one infrared R-24T, "
-            "and two infrared R-60s. Recover at Khasab."
+            "Khasab Control: Razor, two Scuds north of Bandar Abbas. Location and "
+            "movement vary each sortie. Destroy both within forty minutes. "
+            "MiG-23 pair may commit. Recover Khasab."
         )
 
     def _add_mig_trigger(
@@ -441,17 +438,17 @@ class ScudHunt(MissionBuilder):
     def _site_cue(sector: str, state: str) -> str:
         if state == "moving east on the road":
             return (
-                "Khasab Control: SIGINT reports two Scud launchers moving east from the "
-                "Tal Siah storage area toward Baghoo. Search the road corridor."
+                "Khasab Control: two Scuds moving east from Tal Siah toward "
+                "Baghoo. Search the road corridor."
             )
         if sector == "west":
             return (
-                "Khasab Control: SIGINT places the launchers at a storage site near Tal "
-                "Siah. No exact position; search the western side of the area."
+                "Khasab Control: two Scuds near Tal Siah; exact position unknown. "
+                "Search the western sector."
             )
         return (
-            "Khasab Control: SIGINT places the launchers at a launch site near Baghoo. "
-            "No exact position; search the eastern side of the area."
+            "Khasab Control: two Scuds near Baghoo; exact position unknown. "
+            "Search the eastern sector."
         )
 
     @staticmethod

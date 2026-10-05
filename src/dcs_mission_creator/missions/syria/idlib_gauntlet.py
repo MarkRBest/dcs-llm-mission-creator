@@ -2352,11 +2352,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             comment="Magic mission-start picture",
             voice=self._voice,
             text=(
-                "Uzi, Magic on station. Syrian column rolling north-west out of "
-                "Abu al-Duhur, forty minutes from the Taftanaz off-load. Cross the "
-                "line at the seam and stay high through it — the shoulders are "
-                "S-125. Three SAM belts beyond it, SA-6 owns the route. Texaco is "
-                "270.0, TACAN 10X."
+                "Uzi, Magic on station. Column is forty minutes from Taftanaz. "
+                "Cross at the seam and stay high. S-125s guard the shoulders; "
+                "SA-6 owns the route. Texaco two-seven-zero, TACAN ten X."
             ),
         )
 
@@ -2431,10 +2429,9 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             ),
             voice=self._voice,
             text=(
-                "Uzi, Magic. Crossing the line — and we have that Gadfly search "
-                "radar up north of the corridor, same emitter we could not fix "
-                "this morning. No fix on it, so do not arc north of the line: "
-                "stay in the seam and let the SA-6 be your problem."
+                "Uzi, Magic. Gadfly search radar active north of the corridor; no "
+                "fix. Do not arc north. Stay in the seam and accept the SA-6 "
+                "threat."
             ),
             seconds=20,
         )

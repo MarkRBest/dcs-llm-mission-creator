@@ -13,6 +13,8 @@ https://huggingface.co/rhasspy/piper-voices (e.g. `en_GB-alan-medium`,
 from __future__ import annotations
 
 import hashlib
+import math
+import os
 import re
 import wave
 from dataclasses import dataclass, field
@@ -23,6 +25,9 @@ import structlog
 log = structlog.get_logger(__name__)
 
 DEFAULT_VOICE = "en_US-joe-medium"
+DEFAULT_LENGTH_SCALE = 1.20
+VOICE_ENV = "PIPER_VOICE"
+LENGTH_SCALE_ENV = "PIPER_LENGTH_SCALE"
 _DEFAULT_MODEL_DIR = Path("cache") / "voice" / "models"
 
 # Recognize any numbered MiG model instead of maintaining a separate rule for
@@ -125,17 +130,44 @@ class PiperBackend:
         model_dir: where to store/find the `.onnx` and `.onnx.json` files.
             Default: ``cache/voice/models/`` at the project root.
         length_scale: speech rate multiplier; >1.0 = slower, <1.0 = faster.
-            ``None`` keeps the model's default.
+            Defaults to 1.20 so operational calls remain intelligible under
+            cockpit workload. Pass 1.0 for the model's original speed or
+            ``None`` to omit an explicit synthesis setting.
         noise_scale, noise_w: pitch / phoneme-duration jitter. ``None`` keeps
             the model defaults (recommended).
     """
 
     voice: str = DEFAULT_VOICE
     model_dir: Path = field(default_factory=lambda: _DEFAULT_MODEL_DIR)
-    length_scale: float | None = None
+    length_scale: float | None = DEFAULT_LENGTH_SCALE
     noise_scale: float | None = None
     noise_w: float | None = None
     _voice_obj: object = field(default=None, init=False, repr=False)
+
+    @classmethod
+    def from_environment(cls) -> PiperBackend:
+        """Build the default backend from the project's Piper environment.
+
+        Empty values in ``.env`` behave like unset values. Invalid rates fail
+        at construction time rather than after a mission has begun rendering
+        dozens of voice files.
+        """
+        voice = os.environ.get(VOICE_ENV, "").strip() or DEFAULT_VOICE
+        raw_scale = os.environ.get(LENGTH_SCALE_ENV, "").strip()
+        if not raw_scale:
+            length_scale = DEFAULT_LENGTH_SCALE
+        else:
+            try:
+                length_scale = float(raw_scale)
+            except ValueError as exc:
+                raise ValueError(
+                    f"{LENGTH_SCALE_ENV} must be a positive number, got {raw_scale!r}"
+                ) from exc
+            if not math.isfinite(length_scale) or length_scale <= 0:
+                raise ValueError(
+                    f"{LENGTH_SCALE_ENV} must be a positive number, got {raw_scale!r}"
+                )
+        return cls(voice=voice, length_scale=length_scale)
 
     def fingerprint(self) -> str:
         ls = f"{self.length_scale:.2f}" if self.length_scale is not None else "def"

@@ -275,20 +275,17 @@ class UrbanScudHunt(ScudHunt):
     def _mission_start_message(self) -> str:
         """State the urban moving-target problem and the positive-ID rule."""
         return (
-            "Khasab Control: Razor, the latest pre-launch Reaper sweep shows two "
-            "probable Scud launchers circulating through central Bandar Abbas. "
-            "They are moving with buses, cars, and cargo traffic. Positive ID, "
-            "Scud TELs only. Both jets carry four infrared Mavericks. Destroy "
-            "both launchers inside forty minutes. A two-ship MiG-23 response may "
-            "commit once you enter the city search area. Recover at Khasab."
+            "Khasab Control: Razor, two Scuds moving through central Bandar Abbas "
+            "with civilian traffic. Positive ID; TELs only. Destroy both within "
+            "forty minutes. MiG-23 pair may commit. Recover Khasab."
         )
 
     @staticmethod
     def _site_cue(sector: str, state: str) -> str:
         return (
-            f"Khasab Control: the latest Reaper moving-target track began in the "
-            f"{sector} district. Two probable Scud TELs were {state}. The track "
-            "is not current; search the city circuit and confirm the Scud silhouette."
+            f"Khasab Control: last Reaper track began in the {sector} district, "
+            f"{state}. Track is stale. Search the city circuit; confirm the Scud "
+            "silhouette."
         )
 
     @staticmethod
