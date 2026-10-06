@@ -30,10 +30,11 @@ VOICE_ENV = "PIPER_VOICE"
 LENGTH_SCALE_ENV = "PIPER_LENGTH_SCALE"
 _DEFAULT_MODEL_DIR = Path("cache") / "voice" / "models"
 
-# Recognize any numbered MiG model instead of maintaining a separate rule for
-# each variant. Lowercase MiG to keep Piper from spelling the acronym, convert
-# its number to words, and spell any model suffix letter by letter.
+# Recognize numbered Soviet aircraft models instead of maintaining a separate
+# rule for each variant. Convert their number to words and spell any model
+# suffix letter by letter.
 _MIG_MODEL_PATTERN = re.compile(r"\bMiG[\s-]?(\d+)([A-Za-z]*)\b", re.IGNORECASE)
+_SU_MODEL_PATTERN = re.compile(r"\bSu[\s-]?(\d+)([A-Za-z0-9]*)\b", re.IGNORECASE)
 _SMALL_NUMBERS = (
     "zero",
     "one",
@@ -108,8 +109,21 @@ def _speak_mig_model(match: re.Match[str]) -> str:
     return f"{result} {suffix}" if suffix else result
 
 
+def _speak_su_model(match: re.Match[str]) -> str:
+    """Say every Sukhoi model as ``Sukhoi <number> [suffix letters]``.
+
+    This covers current DCS entries such as Su-17M4, Su-24MR, Su-25T, Su-27,
+    Su-30, Su-33, and Su-34 without a growing list of individual aliases.
+    """
+    model_number = _number_words(int(match.group(1)))
+    suffix = " ".join(match.group(2).upper())
+    result = f"Sukhoi {model_number}"
+    return f"{result} {suffix}" if suffix else result
+
+
 def _piper_pronunciation(text: str) -> str:
     text = _MIG_MODEL_PATTERN.sub(_speak_mig_model, text)
+    text = _SU_MODEL_PATTERN.sub(_speak_su_model, text)
     for written, spoken in _PRONUNCIATION_ALIASES:
         text = re.sub(
             rf"\b{re.escape(written)}\b",
@@ -173,7 +187,13 @@ class PiperBackend:
         ls = f"{self.length_scale:.2f}" if self.length_scale is not None else "def"
         ns = f"{self.noise_scale:.2f}" if self.noise_scale is not None else "def"
         nw = f"{self.noise_w:.2f}" if self.noise_w is not None else "def"
-        pronunciation_rules = repr((_MIG_MODEL_PATTERN.pattern, _PRONUNCIATION_ALIASES))
+        pronunciation_rules = repr(
+            (
+                _MIG_MODEL_PATTERN.pattern,
+                _SU_MODEL_PATTERN.pattern,
+                _PRONUNCIATION_ALIASES,
+            )
+        )
         aliases = hashlib.sha256(pronunciation_rules.encode("utf-8"))
         pronunciation_version = aliases.hexdigest()[:8]
         return f"piper|{self.voice}|{ls}|{ns}|{nw}|pron:{pronunciation_version}"
