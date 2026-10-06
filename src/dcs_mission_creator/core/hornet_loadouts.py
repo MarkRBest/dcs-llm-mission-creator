@@ -1,9 +1,7 @@
-"""Role-specific F/A-18C fits for missions that can also fly the Hornet.
+"""Role-specific F/A-18C fits for the parallel Hornet client flights.
 
 The Viper's stations and payload split are intentionally not translated
-mechanically.  These fits use the Hornet's actual stations: AIM-9X on 1/9,
-dual AMRAAM rails on 2/8, ATFLIR on 4, and the 330-gallon centre tank on 5.
-The mission selects a fit whose weapons answer its objective.
+mechanically. These fits use Hornet stations and are selected per mission.
 """
 
 from __future__ import annotations
@@ -116,9 +114,5 @@ def penetrator_and_cap() -> tuple[Loadout, Loadout]:
 
 def cap() -> tuple[Loadout, Loadout]:
     """A six-missile Hornet sweep pair with range for the on-station fight."""
-    fit = Loadout(
-        "A/A",
-        "four AIM-120C, two AIM-9X, ATFLIR, 330 gal",
-        _defence(),
-    )
+    fit = Loadout("A/A", "four AIM-120C, two AIM-9X, ATFLIR, 330 gal", _defence())
     return (fit, fit)

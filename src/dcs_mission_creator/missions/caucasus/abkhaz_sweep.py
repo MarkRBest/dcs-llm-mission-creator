@@ -88,7 +88,6 @@ from dcs_mission_creator.core.mission_kit import (
     set_skill,
 )
 from dcs_mission_creator.core.placement import load_scene
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.routing import ThreatRing, avoid_threats
 from dcs_mission_creator.core.tasking import apply_ai_difficulty
 from dcs_mission_creator.core.weather import Weather, Wind
@@ -300,7 +299,6 @@ class AbkhazSweep(MissionBuilder):
     title = "Abkhaz Sweep"
     difficulty = Difficulty.ACE
     terrain = Caucasus
-    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -339,16 +337,9 @@ class AbkhazSweep(MissionBuilder):
         wind_at_8000=Wind(295, 8),
     )
 
-    def __init__(
-        self,
-        *,
-        players: int = MIN_PLAYERS,
-        aircraft: PlayerAircraft | str | None = None,
-    ) -> None:
-        super().__init__(players=players, aircraft=aircraft)
-        self._bandits = _plan_bandits(
-            self.air_to_air_shots(self.player_loadouts(_FITS, _HORNET_FITS))
-        )
+    def __init__(self, *, players: int = MIN_PLAYERS) -> None:
+        super().__init__(players=players)
+        self._bandits = _plan_bandits(self.air_to_air_shots(_FITS))
 
     # -- in-game and README briefings ---------------------------------------
 
@@ -356,7 +347,7 @@ class AbkhazSweep(MissionBuilder):
         bx, by = self._terrain.bullseye_blue["x"], self._terrain.bullseye_blue["y"]
         su = _SPOKEN[self._bandits.su27_total]
         mig = _SPOKEN[self._bandits.mig29_total]
-        shots = self.air_to_air_shots(self.player_loadouts(_FITS, _HORNET_FITS))
+        shots = self.air_to_air_shots(_FITS)
         return f"""ABKHAZ SWEEP — Caucasus, 18 Jul 2026, 05:30 local (dawn)
 ========================================================
 SITUATION
@@ -390,7 +381,7 @@ WEAPONS
   there is nobody to hand the fight to.
 
 LOADOUT (one magazine, split two ways)
-{self.loadout_brief("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_brief("Dodge", _FITS)}
   Six shots either way. Slot 1 can shoot everything it
   locks; slot 2 has the answer to a merge.
 
@@ -478,7 +469,7 @@ NOTES
         bx, by = self._terrain.bullseye_blue["x"], self._terrain.bullseye_blue["y"]
         su_total = self._bandits.su27_total
         mig_total = self._bandits.mig29_total
-        shots = self.air_to_air_shots(self.player_loadouts(_FITS, _HORNET_FITS))
+        shots = self.air_to_air_shots(_FITS)
         slot_s = "" if self.players == 1 else "s"
         return f"""# Abkhaz Sweep
 
@@ -522,7 +513,7 @@ and no way to rearm. That magazine is what the frag is sized against; see
 
 ### `Dodge` loadout
 
-{self.loadout_table("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_table("Dodge", _FITS)}
 
 A pure sweep is the one tasking where both jets are on the same job, so the
 split is about weapons rather than roles. Slot 1 can shoot everything it locks,
@@ -957,19 +948,30 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Dodge",
-            aircraft_type=self.player_aircraft_type(),
+            aircraft_type=planes.F_16C_50,
             airport=scene.batumi,
             maintask=task.CAP,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
+            loadouts=_FITS,
+        )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.batumi,
+            maintask=task.CAP,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
         )
 
         # Every section flies the one plan: `_route_sweep` is pure geometry
         # against the same rings, so the routes it writes are identical, and the
         # lead's is the one the map and the cartridge are drawn from.
         routes = []
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             player.add_runway_waypoint(scene.batumi)
             routes.append(self._route_sweep(player, scene, threats=threats))
             player.add_runway_waypoint(scene.batumi)

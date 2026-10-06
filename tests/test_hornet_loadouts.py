@@ -1,4 +1,4 @@
-"""The optional Hornet fits use stores on stations the Hornet actually has."""
+"""Hornet client fits use stores on stations the module actually has."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import pytest
 from dcs import planes
 
 from dcs_mission_creator.core import hornet_loadouts, loadout
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 
 
 @pytest.mark.parametrize(
@@ -28,16 +27,3 @@ def test_hornet_fits_use_declared_pylons(fits) -> None:
             assert loadout.pylon_entry(planes.FA_18C_hornet, station, store), (
                 f"{fit.role}: {store} is not available on Hornet station {station}"
             )
-
-
-def test_f16_mission_switches_its_client_type_and_fits() -> None:
-    """The choice changes both the airframe and stores, never just one."""
-    from dcs_mission_creator.missions.caucasus.coastal_cover import (
-        _FITS,
-        _HORNET_FITS,
-        CoastalCover,
-    )
-
-    hornet = CoastalCover(aircraft=PlayerAircraft.FA_18C)
-    assert hornet.player_aircraft_type() is planes.FA_18C_hornet
-    assert hornet.player_loadouts(_FITS, _HORNET_FITS) == _HORNET_FITS

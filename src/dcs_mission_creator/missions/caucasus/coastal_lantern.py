@@ -68,7 +68,6 @@ from dcs_mission_creator.core.placement import (
     find_clear_spot,
     load_scene,
 )
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import (
     FacCallsign,
     apply_ai_difficulty,
@@ -308,7 +307,6 @@ class CoastalLantern(MissionBuilder):
     title = "Operation Coastal Lantern"
     difficulty = Difficulty.TRAINED
     terrain = Caucasus
-    supported_player_aircraft = frozenset(PlayerAircraft)
     blue_task = (
         "Coastal Coalition: earn campaign success through any useful mix of CAP, "
         "SEAD, strike, CAS and helicopter assault tasks."

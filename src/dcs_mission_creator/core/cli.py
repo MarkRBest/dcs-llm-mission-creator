@@ -19,7 +19,6 @@ import structlog
 from dcs_mission_creator.core.log import configure as configure_logging
 from dcs_mission_creator.core.mission_builder import MAX_PLAYERS, MIN_PLAYERS
 from dcs_mission_creator.core.mission_paths import output_relative_path
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 
 if TYPE_CHECKING:
     from dcs_mission_creator.core.mission_builder import MissionBuilder
@@ -57,18 +56,9 @@ def run_cli(
             "them, so slot 1 and slot 2 do not carry the same jet."
         ),
     )
-    parser.add_argument(
-        "--aircraft",
-        type=PlayerAircraft,
-        choices=list(PlayerAircraft),
-        default=None,
-        help="Client aircraft: f16 or f18 (default: this mission's usual module)",
-    )
     args = parser.parse_args(argv)
 
-    miz, readme = builder(players=args.players, aircraft=args.aircraft).generate(
-        args.output_dir
-    )
+    miz, readme = builder(players=args.players).generate(args.output_dir)
     log.info("wrote", mission=builder.name, path=str(miz))
     log.info("wrote", mission=builder.name, path=str(readme))
     return miz, readme

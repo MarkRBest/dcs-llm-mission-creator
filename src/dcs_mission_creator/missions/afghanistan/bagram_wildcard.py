@@ -39,7 +39,6 @@ from dcs_mission_creator.core.map_draw import PlanOverlay
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
 from dcs_mission_creator.core.mission_kit import arm, offset, set_skill
 from dcs_mission_creator.core.placement import load_scene
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import apply_ai_difficulty
 from dcs_mission_creator.core.weather import Weather, Wind
 from dcs_mission_creator.map_overlay.scene import TacticalScene
@@ -370,8 +369,6 @@ class BagramWildcard(MissionBuilder):
     title = "Bagram Wildcard"
     difficulty = Difficulty.TRAINED
     terrain = Afghanistan
-    supported_player_aircraft = frozenset({PlayerAircraft.FA_18C})
-    default_player_aircraft = PlayerAircraft.FA_18C
     blue_task = (
         "Take Razor to the north-eastern Bagram CAP box and clear eight hostile "
         "aircraft under Magic control; composition and axes are unknown."
@@ -393,14 +390,12 @@ class BagramWildcard(MissionBuilder):
         wind_at_8000=Wind(direction=320, speed=15),
     )
 
-    def __init__(
-        self, *, players: int = 2, aircraft: PlayerAircraft | str | None = None
-    ) -> None:
+    def __init__(self, *, players: int = 2) -> None:
         if players != 2:
             raise ValueError(
                 "bagram_wildcard is fixed at one player plus one AI wingman"
             )
-        super().__init__(players=2, aircraft=aircraft)
+        super().__init__(players=2)
 
     def _assemble(self, m: Mission, plan: PlanOverlay) -> Assembled:
         scene = self._scene()

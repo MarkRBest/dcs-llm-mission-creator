@@ -114,7 +114,6 @@ from dcs_mission_creator.core.placement import (
     sam_site_on_ridge,
     snap_units_clear,
 )
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import (
     Chrome,
     Frame,
@@ -331,7 +330,6 @@ class IdlibGauntlet(MissionBuilder):
     title = "Idlib Gauntlet"
     difficulty = Difficulty.TRAINED
     terrain = Syria
-    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -409,7 +407,7 @@ MISSION (Uzi — F-16C-50, Hatay)
   the pocket; the whole column is better.
 
 LOADOUT (Weasel and bomber)
-{self.loadout_brief("Uzi", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_brief("Uzi", _FITS)}
   Slot 1 works the belts; slot 2 works the column. Nothing
   either of you carries rides a laser — Hammer's spot is
   for Pontiac.
@@ -676,7 +674,7 @@ IR-guided.
 
 ### `Uzi` loadout
 
-{self.loadout_table("Uzi", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_table("Uzi", _FITS)}
 
 The frag is two jobs and the flight carries one each. Slot 1 is the Weasel and
 flies with four AMRAAM, because there is an alert pair at Bassel Al-Assad and
@@ -1798,12 +1796,23 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Uzi",
-            aircraft_type=self.player_aircraft_type(),
+            aircraft_type=planes.F_16C_50,
             airport=scene.hatay,
             maintask=task.SEAD,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
+            loadouts=_FITS,
+        )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.hatay,
+            maintask=task.SEAD,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
         )
         push = scene.hatay.position.point_from_heading(
             scene.hatay.position.heading_between_point(scene.route_mid), 25_000.0
@@ -1815,7 +1824,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             waypoints=3,
             leg_search_radius_m=8_000.0,
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_uzi(player, scene, corridor)
         return sections, [*corridor, scene.route_mid]
 

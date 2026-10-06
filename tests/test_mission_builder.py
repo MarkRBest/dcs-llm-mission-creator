@@ -17,7 +17,6 @@ from dcs.mission import Mission
 
 from dcs_mission_creator.core.difficulty import Difficulty
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.weather import Weather, Wind
 from tests.conftest import at
 
@@ -50,15 +49,6 @@ def test_players_in_range_ok(n: int):
 def test_players_out_of_range_raises(n: int):
     with pytest.raises(ValueError, match="players must be 2..6"):
         FakeBuilder(players=n)
-
-
-def test_player_aircraft_defaults_to_the_mission_module():
-    assert FakeBuilder().aircraft is PlayerAircraft.F_16C
-
-
-def test_unsupported_player_aircraft_is_rejected():
-    with pytest.raises(ValueError, match="does not support f18"):
-        FakeBuilder(aircraft=PlayerAircraft.FA_18C)
 
 
 def test_slot_summary_is_plain_below_the_group_limit():

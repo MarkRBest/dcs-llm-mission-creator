@@ -31,7 +31,6 @@ from dcs_mission_creator.core.map_draw import PlanOverlay
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
 from dcs_mission_creator.core.mission_kit import offset, set_skill
 from dcs_mission_creator.core.placement import convoy_spawn, load_scene
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import apply_ai_difficulty
 from dcs_mission_creator.core.triggers import message_to_all, message_to_coalition
 from dcs_mission_creator.core.weather import Weather, Wind
@@ -103,8 +102,6 @@ class ScudHunt(MissionBuilder):
     ground_speed_kph = _GROUND_SPEED_KPH
     difficulty = Difficulty.TRAINED
     terrain = PersianGulf
-    supported_player_aircraft = frozenset({PlayerAircraft.FA_18C})
-    default_player_aircraft = PlayerAircraft.FA_18C
     blue_task = (
         "Find and destroy both Scud-B launchers north of Bandar Abbas before "
         "their 40-minute launch window closes. Their site or movement state "
@@ -128,15 +125,13 @@ class ScudHunt(MissionBuilder):
         wind_at_8000=Wind(direction=330, speed=12),
     )
 
-    def __init__(
-        self, *, players: int = 2, aircraft: PlayerAircraft | str | None = None
-    ) -> None:
+    def __init__(self, *, players: int = 2) -> None:
         # One DCS Player slot and one High-skill AI wingman make this a true
         # single-player sortie while preserving the project's mixed-flight fit
         # bookkeeping. Like bagram_wildcard, this mission is intentionally fixed.
         if players != 2:
             raise ValueError("scud_hunt is fixed at one player plus one AI wingman")
-        super().__init__(players=2, aircraft=aircraft)
+        super().__init__(players=2)
 
     def _assemble(self, m: Mission, plan: PlanOverlay) -> Assembled:
         khasab = self._terrain.airports["Khasab"]

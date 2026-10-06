@@ -110,7 +110,6 @@ from dcs_mission_creator.core.placement import (
     observation_post,
     sam_site_on_ridge,
 )
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import (
     Chrome,
     Frame,
@@ -318,7 +317,6 @@ class CoastalCover(MissionBuilder):
     title = "Coastal Cover"
     difficulty = Difficulty.TRAINED
     terrain = Caucasus
-    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -395,7 +393,7 @@ MISSION (Dodge — F-16C-50, Batumi)
      and he is the reason two bombs are enough.
 
 LOADOUT (the flight splits the frag)
-{self.loadout_brief("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_brief("Dodge", _FITS)}
   Slot 1 flies the strike; slot 2 carries no bomb and
   two more missiles, and covers the run-in.
 
@@ -562,7 +560,7 @@ Three tasks, in the order the sortie will hand them to you.
 
 ### `Dodge` loadout
 
-{self.loadout_table("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_table("Dodge", _FITS)}
 
 The flight splits the frag rather than compromising on one jet. Stations 3 and
 7 are the only ones that take a bomb once the bags are on 4 and 6, so a Viper
@@ -1624,12 +1622,23 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Dodge",
-            aircraft_type=self.player_aircraft_type(),
+            aircraft_type=planes.F_16C_50,
             airport=scene.batumi,
             maintask=task.CAP,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
+            loadouts=_FITS,
+        )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.batumi,
+            maintask=task.CAP,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
         )
         # The bombs and the spot on one code. Nothing is written into the .miz
         # for a Viper — there is no laser-code field on the airframe — so this
@@ -1645,7 +1654,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             waypoints=3,
             leg_search_radius_m=6_000.0,
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_dodge(player, scene, corridor)
         return list(corridor)
 

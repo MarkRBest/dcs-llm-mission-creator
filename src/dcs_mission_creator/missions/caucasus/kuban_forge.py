@@ -108,7 +108,6 @@ from dcs_mission_creator.core.placement import (
     observation_post,
     sam_site_on_ridge,
 )
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import (
     FacCallsign,
     apply_ai_difficulty,
@@ -422,7 +421,6 @@ class KubanForge(MissionBuilder):
     title = "Kuban Forge"
     difficulty = Difficulty.ACE
     terrain = Caucasus
-    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: 07:30 map-local on 18 October 2026 — sunrise over the saddle.
     #:
@@ -530,7 +528,7 @@ MISSION (Colt — F-16C-50, Senaki, hot ramp)
   - RTB Senaki. Divert: Kutaisi.
 
 LOADOUT (four bombs: two JDAM, two laser)
-{self.loadout_brief("Colt", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_brief("Colt", _FITS)}
   No HARM anywhere — there is no Weasel answer to this
   one. Slot 2 carries no bomb either: it is the cover for
   the climb out of the valley.
@@ -713,7 +711,7 @@ arranging.
 
 ### `Colt` loadout
 
-{self.loadout_table("Colt", self.player_loadouts(_FITS, _HORNET_FITS))}
+{self.loadout_table("Colt", _FITS)}
 
 **Four bombs stay four bombs**, and that is the point of the split rather than
 an accident of it. Two casting halls, a shipment that rolls the moment the field
@@ -1596,12 +1594,23 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Colt",
-            aircraft_type=self.player_aircraft_type(),
+            aircraft_type=planes.F_16C_50,
             airport=scene.senaki,
             maintask=task.PinpointStrike,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
+            loadouts=_FITS,
+        )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.senaki,
+            maintask=task.PinpointStrike,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
         )
         # The two GBU-12s and `Ferret`'s spot on one code. The Viper carries no
         # laser-code field, so this writes nothing into the .miz and instead
@@ -1617,7 +1626,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         egress = waypoints.agl_profile(
             scene.egress, overlay, clearance_m=_LEG_CLEARANCE_M
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_colt(player, scene, ingress, egress, halls=halls)
         route = [
             *(leg.position for leg, _ in ingress),

@@ -29,7 +29,6 @@ from dcs_mission_creator.core.map_draw import PlanOverlay
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
 from dcs_mission_creator.core.mission_kit import offset, player_flight, set_skill
 from dcs_mission_creator.core.placement import load_scene
-from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import Chrome, Frame, Mark, sensor_still
 from dcs_mission_creator.core.weather import Weather, Wind
 
@@ -73,8 +72,6 @@ class BagramCaveStrike(MissionBuilder):
     title = "Bagram Cave Strike"
     difficulty = Difficulty.RECRUIT
     terrain = Afghanistan
-    supported_player_aircraft = frozenset({PlayerAircraft.FA_18C})
-    default_player_aircraft = PlayerAircraft.FA_18C
     blue_task = (
         "Launch hot from Bagram, strike the Panjshir cave entrance with "
         "GBU-24B/B Paveway IIIs, avoid the short-range defences, and recover at Bagram."
