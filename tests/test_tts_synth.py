@@ -16,6 +16,7 @@ from dcs_mission_creator.core.tts.piper import (
     DEFAULT_LENGTH_SCALE,
     DEFAULT_VOICE,
     PiperBackend,
+    _piper_pronunciation,
 )
 from dcs_mission_creator.core.tts.synth import VoiceSynth
 
@@ -72,6 +73,26 @@ def test_piper_rejects_invalid_environment_rate(monkeypatch, value: str):
 
     with pytest.raises(ValueError, match="PIPER_LENGTH_SCALE"):
         PiperBackend.from_environment()
+
+
+@pytest.mark.parametrize(
+    ("written", "spoken"),
+    [
+        ("Su-17M4", "Sukhoi seventeen M 4"),
+        ("Su-24M", "Sukhoi twenty-four M"),
+        ("Su-24MR", "Sukhoi twenty-four M R"),
+        ("Su-25", "Sukhoi twenty-five"),
+        ("Su-25T", "Sukhoi twenty-five T"),
+        ("Su-25TM", "Sukhoi twenty-five T M"),
+        ("Su-27", "Sukhoi twenty-seven"),
+        ("Su-30", "Sukhoi thirty"),
+        ("Su-33", "Sukhoi thirty-three"),
+        ("Su-34", "Sukhoi thirty-four"),
+        ("SU 25T", "Sukhoi twenty-five T"),  # case and whitespace are accepted
+    ],
+)
+def test_piper_pronounces_sukhoi_models_by_name(written: str, spoken: str):
+    assert _piper_pronunciation(written) == spoken
 
 
 def test_render_cache_miss_calls_backend_once(tmp_path: Path):
