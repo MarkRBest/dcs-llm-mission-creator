@@ -82,6 +82,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     laser,
     loadout,
@@ -319,6 +320,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.sead_jsow()
 
 
 class IdlibGauntlet(MissionBuilder):
@@ -1799,6 +1803,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.hatay,
+            maintask=task.SEAD,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
         push = scene.hatay.position.point_from_heading(
             scene.hatay.position.heading_between_point(scene.route_mid), 25_000.0
         )
@@ -1809,7 +1824,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             waypoints=3,
             leg_search_radius_m=8_000.0,
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_uzi(player, scene, corridor)
         return sections, [*corridor, scene.route_mid]
 

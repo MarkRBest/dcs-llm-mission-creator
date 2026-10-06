@@ -45,6 +45,7 @@ from dcs.unitgroup import FlyingGroup
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     loadout,
     sanctuary as sanc,
     triggers as mission_triggers,
@@ -245,6 +246,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.sead_jsow()
 
 
 class DaryalRun(MissionBuilder):
@@ -834,6 +838,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.vaziani,
+            maintask=task.SEAD,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
 
         overlay = scene.overlay.overlay
         ingress = waypoints.agl_profile(
@@ -851,7 +866,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         # looked at. Finding the radars inside the ELINT cut is the sortie, and
         # that is what the HTS and the HARM are aboard for.
         target, _ = plan.estimate(scene.sa10_site, radius=_SA10_RING_M)
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_dodge(player, scene, ingress, egress, target)
         route = [
             *(leg.position for leg, _ in ingress),

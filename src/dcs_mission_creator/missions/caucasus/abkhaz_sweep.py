@@ -67,6 +67,7 @@ from dcs.unitgroup import FlyingGroup, VehicleGroup
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     loadout,
     sanctuary as sanc,
     triggers as mission_triggers,
@@ -288,6 +289,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.cap()
 
 
 class AbkhazSweep(MissionBuilder):
@@ -951,12 +955,23 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.batumi,
+            maintask=task.CAP,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
 
         # Every section flies the one plan: `_route_sweep` is pure geometry
         # against the same rings, so the routes it writes are identical, and the
         # lead's is the one the map and the cartridge are drawn from.
         routes = []
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             player.add_runway_waypoint(scene.batumi)
             routes.append(self._route_sweep(player, scene, threats=threats))
             player.add_runway_waypoint(scene.batumi)

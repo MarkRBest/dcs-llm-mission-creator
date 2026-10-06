@@ -45,6 +45,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     loadout,
     routing,
     sanctuary as sanc,
@@ -163,6 +164,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.sead_and_cap()
 
 
 class EasternShield(MissionBuilder):
@@ -982,6 +986,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.incirlik,
+            maintask=task.SEAD,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
         push = offset(scene.incirlik.position, east_m=20_000, north_m=-25_000)
         corridor = scene.overlay.place_ingress_corridor(
             ip=push,
@@ -990,7 +1005,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             waypoints=4,
             leg_search_radius_m=8_000.0,
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_springfield(player, scene, corridor)
         return [*corridor, scene.depot_anchor]
 

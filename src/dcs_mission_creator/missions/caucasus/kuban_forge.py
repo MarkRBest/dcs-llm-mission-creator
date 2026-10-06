@@ -76,6 +76,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     laser,
     loadout,
@@ -410,6 +411,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.jdam_and_laser()
 
 
 class KubanForge(MissionBuilder):
@@ -1597,6 +1601,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.senaki,
+            maintask=task.PinpointStrike,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
         # The two GBU-12s and `Ferret`'s spot on one code. The Viper carries no
         # laser-code field, so this writes nothing into the .miz and instead
         # refuses a code the jet would not come up on — which is what the
@@ -1611,7 +1626,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         egress = waypoints.agl_profile(
             scene.egress, overlay, clearance_m=_LEG_CLEARANCE_M
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_colt(player, scene, ingress, egress, halls=halls)
         route = [
             *(leg.position for leg, _ in ingress),

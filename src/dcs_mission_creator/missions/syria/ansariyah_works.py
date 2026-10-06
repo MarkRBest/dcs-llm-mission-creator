@@ -107,6 +107,7 @@ from dcs.unitgroup import FlyingGroup, StaticGroup, VehicleGroup
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     loadout,
     routing,
@@ -390,6 +391,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.penetrator_and_cap()
 
 
 class AnsariyahWorks(MissionBuilder):
@@ -1789,6 +1793,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.akrotiri,
+            maintask=task.PinpointStrike,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
         # Both ends of the deck run are the *briefed* edge of the Gammon's ring,
         # not the real one — same estimate the F10 map paints and the cartridge
         # loads. A wider claim buys a longer run on the deck, which is the right
@@ -1825,7 +1840,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             clearance_m=_LEG_CLEARANCE_M,
             ground_floor_m=0.0,
         )
-        for section in sections:
+        for section in [*sections, *hornet_sections]:
             self._route_colt(
                 section,
                 scene,

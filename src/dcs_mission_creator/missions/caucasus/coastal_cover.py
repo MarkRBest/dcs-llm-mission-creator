@@ -81,6 +81,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     laser,
     loadout,
@@ -306,6 +307,9 @@ _TACP_SIGHT_LOST_FRACTION = 0.80
 # CLAUDE.md is for supersonic fighters; a Hind, like the A-10C, cruises close to
 # its own ceiling and has no afterburner to get wrong.
 _HIND_SPEED_KPH = 250
+
+
+_HORNET_FITS = hornet_loadouts.laser_and_cap()
 
 
 class CoastalCover(MissionBuilder):
@@ -1625,6 +1629,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.batumi,
+            maintask=task.CAP,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
         # The bombs and the spot on one code. Nothing is written into the .miz
         # for a Viper — there is no laser-code field on the airframe — so this
         # is a build-time check that the number the briefing quotes is the one
@@ -1639,7 +1654,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             waypoints=3,
             leg_search_radius_m=6_000.0,
         )
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_dodge(player, scene, corridor)
         return list(corridor)
 

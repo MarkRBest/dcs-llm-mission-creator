@@ -47,6 +47,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     laser,
     loadout,
     routing,
@@ -190,6 +191,9 @@ _FITS = (
         ),
     ),
 )
+
+
+_HORNET_FITS = hornet_loadouts.cluster_and_laser()
 
 
 class KodoriStrike(MissionBuilder):
@@ -1112,6 +1116,17 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             slots=self.players,
             loadouts=_FITS,
         )
+        hornet_sections = player_flight(
+            m,
+            country=usa,
+            name="Hornet",
+            aircraft_type=planes.FA_18C_hornet,
+            airport=scene.kutaisi,
+            maintask=task.CAS,
+            start_type=StartType.Warm,
+            slots=self.players,
+            loadouts=_HORNET_FITS,
+        )
         # Slot 2's GBU-12s ride a spot, so the code is stated rather than
         # assumed. Nothing lands in the .miz for a Viper; what this buys is that
         # the briefing and the jet cannot say different numbers.
@@ -1126,7 +1141,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             leg_search_radius_m=6_000.0,
         )
         egress = offset(scene.ao_center, east_m=20_000, north_m=-15_000)
-        for player in sections:
+        for player in [*sections, *hornet_sections]:
             self._route_dodge(player, scene, corridor, egress)
         return [*corridor, egress]
 
