@@ -45,6 +45,7 @@ from dcs_mission_creator.core.map_draw import PlanOverlay
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
 from dcs_mission_creator.core.mission_kit import offset
 from dcs_mission_creator.core.placement import load_scene
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.waypoints import Leg
 from dcs_mission_creator.core.weather import Weather, Wind
 from dcs_mission_creator.map_overlay.scene import TacticalScene
@@ -149,6 +150,8 @@ class PanjshirBlackout(MissionBuilder):
     title = "Panjshir Blackout"
     difficulty = Difficulty.VETERAN
     terrain = Afghanistan
+    supported_player_aircraft = frozenset({PlayerAircraft.FA_18C})
+    default_player_aircraft = PlayerAircraft.FA_18C
     blue_task = (
         "Fly Razor's terrain-masked Panjshir ingress, suppress the Russian IADS, "
         "destroy both hardened Grom command bunkers, and recover at Bagram."
@@ -170,13 +173,15 @@ class PanjshirBlackout(MissionBuilder):
         wind_at_8000=Wind(direction=320, speed=14),
     )
 
-    def __init__(self, *, players: int = 2) -> None:
+    def __init__(
+        self, *, players: int = 2, aircraft: PlayerAircraft | str | None = None
+    ) -> None:
         if players != 2:
             raise ValueError(
                 "panjshir_blackout is a fixed single-player mission: "
                 "one human lead plus one AI wingman"
             )
-        super().__init__(players=2)
+        super().__init__(players=2, aircraft=aircraft)
 
     def _assemble(self, m: Mission, plan: PlanOverlay) -> Assembled:
         scene = self._scene()

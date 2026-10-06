@@ -45,6 +45,7 @@ from dcs.unitgroup import FlyingGroup
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     loadout,
     sanctuary as sanc,
     triggers as mission_triggers,
@@ -64,6 +65,7 @@ from dcs_mission_creator.core.mission_kit import (
     unit_of_type,
 )
 from dcs_mission_creator.core.placement import load_scene
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import apply_ai_difficulty
 from dcs_mission_creator.core.waypoints import Leg
 from dcs_mission_creator.core.weather import Weather, Wind
@@ -247,11 +249,15 @@ _FITS = (
 )
 
 
+_HORNET_FITS = hornet_loadouts.sead_jsow()
+
+
 class DaryalRun(MissionBuilder):
     name = "daryal_run"
     title = "Daryal Run"
     difficulty = Difficulty.ACE
     terrain = Caucasus
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -328,7 +334,7 @@ MISSION (Dodge — F-16C-50, Vaziani, hot ramp)
   - RTB Vaziani. Divert: Soganlug.
 
 LOADOUT (shooter and killer)
-{self.loadout_brief("Dodge", _FITS)}
+{self.loadout_brief("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
   Slot 1 kills the emitters. Slot 2 kills what stops
   emitting.
 
@@ -468,7 +474,7 @@ ace composition, and the flight is the whole package. Carry externals.
 
 ### `Dodge` loadout
 
-{self.loadout_table("Dodge", _FITS)}
+{self.loadout_table("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 Shooter and killer, which is what a Weasel pair has always been. Slot 1 kills
 the emitters; slot 2 kills what stops emitting, because a battery that goes
@@ -827,12 +833,12 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Dodge",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.vaziani,
             maintask=task.SEAD,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
 
         overlay = scene.overlay.overlay

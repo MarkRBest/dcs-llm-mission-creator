@@ -49,6 +49,7 @@ from dcs_mission_creator.core.mission_builder import (
     MissionBuilder,
 )
 from dcs_mission_creator.core.mission_paths import output_relative_path
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.map_overlay.layers import BuildLayer, QueryLayer, RenderLayer
 
 if TYPE_CHECKING:
@@ -108,8 +109,10 @@ def _generate_one(
     cls: type[MissionBuilder],
     target: Path,
     players: int,
+    aircraft: PlayerAircraft | None = None,
 ) -> None:
-    miz, readme = cls(players=players).generate(target)
+    builder = _builder_for(cls, players, aircraft)
+    miz, readme = builder.generate(target)
     log.info("wrote", mission=slug, path=str(miz))
     log.info("wrote", mission=slug, path=str(readme))
 
@@ -129,13 +132,16 @@ def _cmd_generate(
     name: str | None,
     output_dir: Path | None,
     players: int,
+    aircraft: PlayerAircraft | None = None,
 ) -> int:
     """Generate one mission by slug, or every discovered mission when `name` is None."""
     if name is not None:
         cls = missions_map.get(name)
         if cls is None:
             return _unknown_mission(missions_map, name)
-        _generate_one(name, cls, output_dir or _default_output_dir(cls), players)
+        _generate_selected(
+            name, cls, output_dir or _default_output_dir(cls), players, aircraft
+        )
         return 0
 
     if not missions_map:
@@ -151,7 +157,7 @@ def _cmd_generate(
             else _default_output_dir(missions_map[slug])
         )
         try:
-            _generate_one(slug, missions_map[slug], target, players)
+            _generate_selected(slug, missions_map[slug], target, players, aircraft)
         except Exception:
             log.exception("failed to generate mission", mission=slug)
             failed.append(slug)
@@ -165,6 +171,7 @@ def _cmd_audit(
     missions_map: dict[str, type[MissionBuilder]],
     name: str | None,
     players: int,
+    aircraft: PlayerAircraft | None = None,
 ) -> int:
     """Build one mission — or every one — without saving, and print the findings.
 
@@ -182,11 +189,36 @@ def _cmd_audit(
         cls = missions_map.get(slug)
         if cls is None:
             return _unknown_mission(missions_map, slug)
-        findings = audit(cls(players=players))
+        findings = audit(_builder_for(cls, players, aircraft))
         errors += sum(1 for f in findings if f.severity == "error")
         print(f"\n=== {slug} ({len(findings)} finding(s))")
         print(report(findings))
     return 1 if errors else 0
+
+
+def _generate_selected(
+    slug: str,
+    cls: type[MissionBuilder],
+    target: Path,
+    players: int,
+    aircraft: PlayerAircraft | None,
+) -> None:
+    """Keep the long-standing four-argument generation seam when unselected."""
+    if aircraft is None:
+        _generate_one(slug, cls, target, players)
+    else:
+        _generate_one(slug, cls, target, players, aircraft)
+
+
+def _builder_for(
+    cls: type[MissionBuilder], players: int, aircraft: PlayerAircraft | None
+) -> MissionBuilder:
+    """Construct a builder without changing legacy subclass constructors."""
+    return (
+        cls(players=players)
+        if aircraft is None
+        else cls(players=players, aircraft=aircraft)
+    )
 
 
 def _cmd_survey(
@@ -538,6 +570,17 @@ def _add_players(parser: argparse.ArgumentParser, help_text: str) -> None:
     )
 
 
+def _add_aircraft(parser: argparse.ArgumentParser) -> None:
+    """The explicitly supported player module, shared by build and audit."""
+    parser.add_argument(
+        "--aircraft",
+        type=PlayerAircraft,
+        choices=list(PlayerAircraft),
+        default=None,
+        help="Client aircraft: f16 or f18 (default: the mission's usual module).",
+    )
+
+
 def _add_mission_slug(
     parser: argparse.ArgumentParser,
     missions_map: dict[str, type[MissionBuilder]],
@@ -601,9 +644,10 @@ def build_parser(
         f"(default: {MIN_PLAYERS}). The flight splits its loadout across "
         "them, so slot 1 and slot 2 do not carry the same jet.",
     )
+    _add_aircraft(gen)
     gen.set_defaults(
         run=lambda args: _cmd_generate(
-            missions_map, args.name, args.output_dir, args.players
+            missions_map, args.name, args.output_dir, args.players, args.aircraft
         )
     )
 
@@ -616,7 +660,12 @@ def build_parser(
     )
     _add_mission_slug(aud, missions_map, "Mission slug. Omit to audit every mission.")
     _add_players(aud, f"Coop client slots to build for (default: {MIN_PLAYERS}).")
-    aud.set_defaults(run=lambda args: _cmd_audit(missions_map, args.name, args.players))
+    _add_aircraft(aud)
+    aud.set_defaults(
+        run=lambda args: _cmd_audit(
+            missions_map, args.name, args.players, args.aircraft
+        )
+    )
 
     srv = sub.add_parser(
         "survey",

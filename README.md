@@ -71,9 +71,13 @@ uv run dcs-mission-creator generate coastal_cover
 #   → .../caucasus/coastal_cover/kneeboard/*.png
 
 uv run dcs-mission-creator generate coastal_cover --output-dir out/coastal_cover
+uv run dcs-mission-creator generate coastal_cover --aircraft f18 --output-dir out/coastal_cover_hornet
 ```
 
 Add `--players N` (2–6) to scale the player flight into a coop mission.
+F-16-focused combat missions that support the Hornet accept `--aircraft f18`;
+they retain their existing F-16C fit unless you request the Hornet. The Hornet
+receives a mission-specific loadout rather than a copy of the Viper's pylons.
 
 ### 4. Fly it
 

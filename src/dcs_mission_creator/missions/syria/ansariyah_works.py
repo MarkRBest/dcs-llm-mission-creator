@@ -107,6 +107,7 @@ from dcs.unitgroup import FlyingGroup, StaticGroup, VehicleGroup
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     loadout,
     routing,
@@ -130,6 +131,7 @@ from dcs_mission_creator.core.mission_kit import (
     set_skill,
 )
 from dcs_mission_creator.core.placement import load_scene
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.routing import ThreatRing
 from dcs_mission_creator.core.tasking import (
     apply_ai_difficulty,
@@ -392,11 +394,15 @@ _FITS = (
 )
 
 
+_HORNET_FITS = hornet_loadouts.penetrator_and_cap()
+
+
 class AnsariyahWorks(MissionBuilder):
     name = "ansariyah_works"
     title = "Ansariyah Works"
     difficulty = Difficulty.VETERAN
     terrain = Syria
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: 06:35 map-local on 3 April 2026 — the wall clock DCS shows in-game.
     #:
@@ -486,7 +492,7 @@ MISSION (Colt — F-16C-50, Akrotiri, hot ramp)
   - RTB Akrotiri. Divert: Paphos.
 
 LOADOUT (one bomber, one escort)
-{self.loadout_brief("Colt", _FITS)}
+{self.loadout_brief("Colt", self.player_loadouts(_FITS, _HORNET_FITS))}
   Two bombs, three aimpoints. Slot 2 carries no bomb: it
   is the only cover you have east of the band.
 
@@ -683,7 +689,7 @@ its own from the letdown to feet wet.
 
 ### `Colt` loadout
 
-{self.loadout_table("Colt", _FITS)}
+{self.loadout_table("Colt", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 **Two bombs against three aimpoints** is the sortie, and it stays the sortie:
 the second jet is not a second bomber. It is the only friendly cover east of
@@ -1782,12 +1788,12 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Colt",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.akrotiri,
             maintask=task.PinpointStrike,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
         # Both ends of the deck run are the *briefed* edge of the Gammon's ring,
         # not the real one — same estimate the F10 map paints and the cartridge

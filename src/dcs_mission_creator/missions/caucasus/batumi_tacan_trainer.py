@@ -25,6 +25,7 @@ from dcs_mission_creator.core.map_draw import PlanOverlay
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
 from dcs_mission_creator.core.mission_kit import player_flight
 from dcs_mission_creator.core.placement import load_scene
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.weather import Weather, Wind
 
 _KOBULETI_TACAN = "67X"
@@ -50,6 +51,7 @@ class BatumiTacanTrainer(MissionBuilder):
     title = "Batumi TACAN Trainer"
     difficulty = Difficulty.RECRUIT
     terrain = Caucasus
+    supported_player_aircraft = frozenset(PlayerAircraft)
     blue_task = "Navigate from Batumi to Kobuleti using KBL TACAN 67X; land safely."
     red_task = "No tasking: this is a blue navigation and landing exercise."
     # DCS reads this as map-local time; the UTC marker is only an explicit record.

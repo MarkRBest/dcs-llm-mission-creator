@@ -76,6 +76,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     laser,
     loadout,
@@ -107,6 +108,7 @@ from dcs_mission_creator.core.placement import (
     observation_post,
     sam_site_on_ridge,
 )
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import (
     FacCallsign,
     apply_ai_difficulty,
@@ -412,11 +414,15 @@ _FITS = (
 )
 
 
+_HORNET_FITS = hornet_loadouts.jdam_and_laser()
+
+
 class KubanForge(MissionBuilder):
     name = "kuban_forge"
     title = "Kuban Forge"
     difficulty = Difficulty.ACE
     terrain = Caucasus
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: 07:30 map-local on 18 October 2026 — sunrise over the saddle.
     #:
@@ -524,7 +530,7 @@ MISSION (Colt — F-16C-50, Senaki, hot ramp)
   - RTB Senaki. Divert: Kutaisi.
 
 LOADOUT (four bombs: two JDAM, two laser)
-{self.loadout_brief("Colt", _FITS)}
+{self.loadout_brief("Colt", self.player_loadouts(_FITS, _HORNET_FITS))}
   No HARM anywhere — there is no Weasel answer to this
   one. Slot 2 carries no bomb either: it is the cover for
   the climb out of the valley.
@@ -707,7 +713,7 @@ arranging.
 
 ### `Colt` loadout
 
-{self.loadout_table("Colt", _FITS)}
+{self.loadout_table("Colt", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 **Four bombs stay four bombs**, and that is the point of the split rather than
 an accident of it. Two casting halls, a shipment that rolls the moment the field
@@ -1590,12 +1596,12 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Colt",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.senaki,
             maintask=task.PinpointStrike,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
         # The two GBU-12s and `Ferret`'s spot on one code. The Viper carries no
         # laser-code field, so this writes nothing into the .miz and instead

@@ -81,6 +81,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     laser,
     loadout,
@@ -109,6 +110,7 @@ from dcs_mission_creator.core.placement import (
     observation_post,
     sam_site_on_ridge,
 )
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import (
     Chrome,
     Frame,
@@ -308,11 +310,15 @@ _TACP_SIGHT_LOST_FRACTION = 0.80
 _HIND_SPEED_KPH = 250
 
 
+_HORNET_FITS = hornet_loadouts.laser_and_cap()
+
+
 class CoastalCover(MissionBuilder):
     name = "coastal_cover"
     title = "Coastal Cover"
     difficulty = Difficulty.TRAINED
     terrain = Caucasus
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -389,7 +395,7 @@ MISSION (Dodge — F-16C-50, Batumi)
      and he is the reason two bombs are enough.
 
 LOADOUT (the flight splits the frag)
-{self.loadout_brief("Dodge", _FITS)}
+{self.loadout_brief("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
   Slot 1 flies the strike; slot 2 carries no bomb and
   two more missiles, and covers the run-in.
 
@@ -556,7 +562,7 @@ Three tasks, in the order the sortie will hand them to you.
 
 ### `Dodge` loadout
 
-{self.loadout_table("Dodge", _FITS)}
+{self.loadout_table("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 The flight splits the frag rather than compromising on one jet. Stations 3 and
 7 are the only ones that take a bomb once the bags are on 4 and 6, so a Viper
@@ -1618,12 +1624,12 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Dodge",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.batumi,
             maintask=task.CAP,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
         # The bombs and the spot on one code. Nothing is written into the .miz
         # for a Viper — there is no laser-code field on the airframe — so this

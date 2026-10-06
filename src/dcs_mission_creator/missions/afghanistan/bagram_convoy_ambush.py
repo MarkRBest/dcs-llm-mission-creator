@@ -28,6 +28,7 @@ from dcs_mission_creator.core.map_draw import PlanOverlay
 from dcs_mission_creator.core.mission_builder import Assembled, MissionBuilder
 from dcs_mission_creator.core.mission_kit import arm, offset, player_flight, set_skill
 from dcs_mission_creator.core.placement import load_scene
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.tasking import apply_ai_difficulty, scramble_on_trigger
 from dcs_mission_creator.core.weather import Weather, Wind
 from dcs_mission_creator.map_overlay.scene import ConvoyRoute
@@ -91,6 +92,8 @@ class BagramConvoyAmbush(MissionBuilder):
     title = "Bagram Convoy Ambush"
     difficulty = Difficulty.TRAINED
     terrain = Afghanistan
+    supported_player_aircraft = frozenset({PlayerAircraft.FA_18C})
+    default_player_aircraft = PlayerAircraft.FA_18C
     blue_task = (
         "Destroy the convoy before it reaches the Panjshir-side villages. "
         "Expect MANPADS after the lead vehicle is hit and both Kabul fighter "

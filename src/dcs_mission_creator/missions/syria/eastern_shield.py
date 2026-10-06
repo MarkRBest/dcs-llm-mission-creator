@@ -45,6 +45,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     loadout,
     routing,
     sanctuary as sanc,
@@ -66,6 +67,7 @@ from dcs_mission_creator.core.mission_kit import (
     set_skill,
 )
 from dcs_mission_creator.core.placement import load_scene, sam_site_on_ridge
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.routing import ThreatRing
 from dcs_mission_creator.core.tasking import (
     apply_ai_difficulty,
@@ -165,11 +167,15 @@ _FITS = (
 )
 
 
+_HORNET_FITS = hornet_loadouts.sead_and_cap()
+
+
 class EasternShield(MissionBuilder):
     name = "eastern_shield"
     title = "Eastern Shield"
     difficulty = Difficulty.TRAINED
     terrain = Syria
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -232,7 +238,7 @@ MISSION (Springfield — F-16C-50, Incirlik)
            on the Aleppo road to retake the ground.
 
 LOADOUT (the flight splits the frag)
-{self.loadout_brief("Springfield", _FITS)}
+{self.loadout_brief("Springfield", self.player_loadouts(_FITS, _HORNET_FITS))}
   Slot 1 puts the ridge down and releases Hawg. Slot 2 is
   your own answer to the Fulcrums — Eagle is 21 minutes
   from its station and cannot be it.
@@ -341,7 +347,7 @@ the Russian reserve can close the road.
 
 ### `Springfield` loadout
 
-{self.loadout_table("Springfield", _FITS)}
+{self.loadout_table("Springfield", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 Three kills are tasked here — the SA-6's search radar, the depot and the
 Fulcrum pair — and the depot belongs to `Hawg`. The other two are not the same
@@ -975,12 +981,12 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Springfield",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.incirlik,
             maintask=task.SEAD,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
         push = offset(scene.incirlik.position, east_m=20_000, north_m=-25_000)
         corridor = scene.overlay.place_ingress_corridor(

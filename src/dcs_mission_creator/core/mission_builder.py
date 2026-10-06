@@ -41,6 +41,7 @@ from dcs_mission_creator.core import (
 from dcs_mission_creator.core.difficulty import Difficulty
 from dcs_mission_creator.core.loadout import Loadout
 from dcs_mission_creator.core.map_draw import PlanOverlay
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import publish as recon
 from dcs_mission_creator.core.tts import VoiceSynth
 from dcs_mission_creator.core.weather import Weather
@@ -129,16 +130,54 @@ class MissionBuilder(ABC):
     #: ships it, via `recon.publish_stills`.
     _still: ReconStill | None = None
 
-    def __init__(self, *, players: int = MIN_PLAYERS) -> None:
+    #: Aircraft that this scenario has explicitly supplied client fits for.
+    #: Most existing missions remain Viper-only until their briefing, balance,
+    #: and stores have all been designed for another module.
+    supported_player_aircraft = frozenset({PlayerAircraft.F_16C})
+
+    #: Preserve a mission's established module when no explicit choice is made.
+    default_player_aircraft = PlayerAircraft.F_16C
+
+    def __init__(
+        self,
+        *,
+        players: int = MIN_PLAYERS,
+        aircraft: PlayerAircraft | str | None = None,
+    ) -> None:
         if players < MIN_PLAYERS or players > MAX_PLAYERS:
             raise ValueError(
                 f"players must be {MIN_PLAYERS}..{MAX_PLAYERS}, got {players}"
             )
         self.players = players
+        self.aircraft = PlayerAircraft(aircraft or self.default_player_aircraft)
+        if self.aircraft not in self.supported_player_aircraft:
+            available = ", ".join(a.value for a in self.supported_player_aircraft)
+            raise ValueError(
+                f"{self.name} does not support {self.aircraft.value}; "
+                f"choose one of: {available}"
+            )
         # Before any flight is built: pydcs caches its payload dirs on first use.
         dcs_install.configure()
         self._pin_runway_waypoint_distance()
         self._pin_onboard_numbers()
+
+    def player_aircraft_type(self):
+        """The selected pydcs type for the mission's client flight."""
+        return self.aircraft.unit_type
+
+    def player_loadouts(
+        self,
+        f16_loadouts: Sequence[Loadout],
+        hornet_loadouts: Sequence[Loadout],
+    ) -> Sequence[Loadout]:
+        """Return the fit table for the selected client aircraft.
+
+        Keeping the tables paired at each mission makes the choice explicit:
+        Hornet pylons never inherit a Viper station number or store name.
+        """
+        return (
+            f16_loadouts if self.aircraft is PlayerAircraft.F_16C else hornet_loadouts
+        )
 
     @abstractmethod
     def _assemble(self, m: Mission, plan: PlanOverlay) -> Assembled:

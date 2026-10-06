@@ -47,6 +47,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     laser,
     loadout,
     routing,
@@ -75,6 +76,7 @@ from dcs_mission_creator.core.placement import (
     load_scene,
     snap_units_clear,
 )
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import (
     Chrome,
     Frame,
@@ -192,11 +194,15 @@ _FITS = (
 )
 
 
+_HORNET_FITS = hornet_loadouts.cluster_and_laser()
+
+
 class KodoriStrike(MissionBuilder):
     name = "kodori_strike"
     title = "Kodori Strike"
     difficulty = Difficulty.TRAINED
     terrain = Caucasus
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -258,7 +264,7 @@ MISSION (Dodge — F-16C-50, Kutaisi)
   needed, work the target box, RTB Kutaisi.
 
 LOADOUT (the flight splits the target)
-{self.loadout_brief("Dodge", _FITS)}
+{self.loadout_brief("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
   Slot 1's submunitions are for the platoon in the open;
   slot 2's laser bombs are for the tanks and the Shilka.
   There is no controller on this target: slot 2 lases its
@@ -379,7 +385,7 @@ answers to that rather than one compromise — see the loadout table below.
 
 ### `Dodge` loadout
 
-{self.loadout_table("Dodge", _FITS)}
+{self.loadout_table("Dodge", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 Nine vehicles scattered over a clearing, two of them main battle tanks and one
 a Shilka, is not one target — so the flight does not carry one weapon. Slot 1
@@ -968,7 +974,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
         weasel = m.flight_group_from_airport(
             country=usa,
             name="Weasel",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.kutaisi,
             maintask=task.SEAD,
             start_type=StartType.Warm,
@@ -1110,7 +1116,7 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             maintask=task.CAS,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
         # Slot 2's GBU-12s ride a spot, so the code is stated rather than
         # assumed. Nothing lands in the .miz for a Viper; what this buys is that

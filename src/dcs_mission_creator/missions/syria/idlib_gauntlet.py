@@ -82,6 +82,7 @@ from dcs.unittype import VehicleType
 from dcs_mission_creator.core import (
     air_defense as ad,
     dtc,
+    hornet_loadouts,
     kneeboard,
     laser,
     loadout,
@@ -113,6 +114,7 @@ from dcs_mission_creator.core.placement import (
     sam_site_on_ridge,
     snap_units_clear,
 )
+from dcs_mission_creator.core.player_aircraft import PlayerAircraft
 from dcs_mission_creator.core.recon import (
     Chrome,
     Frame,
@@ -321,11 +323,15 @@ _FITS = (
 )
 
 
+_HORNET_FITS = hornet_loadouts.sead_jsow()
+
+
 class IdlibGauntlet(MissionBuilder):
     name = "idlib_gauntlet"
     title = "Idlib Gauntlet"
     difficulty = Difficulty.TRAINED
     terrain = Syria
+    supported_player_aircraft = frozenset(PlayerAircraft)
 
     #: The two coalition task panels. Plain strings: nothing here needs
     #: to compute one, and `blue_task_text` / `red_task_text` are there
@@ -403,7 +409,7 @@ MISSION (Uzi — F-16C-50, Hatay)
   the pocket; the whole column is better.
 
 LOADOUT (Weasel and bomber)
-{self.loadout_brief("Uzi", _FITS)}
+{self.loadout_brief("Uzi", self.player_loadouts(_FITS, _HORNET_FITS))}
   Slot 1 works the belts; slot 2 works the column. Nothing
   either of you carries rides a laser — Hammer's spot is
   for Pontiac.
@@ -670,7 +676,7 @@ IR-guided.
 
 ### `Uzi` loadout
 
-{self.loadout_table("Uzi", _FITS)}
+{self.loadout_table("Uzi", self.player_loadouts(_FITS, _HORNET_FITS))}
 
 The frag is two jobs and the flight carries one each. Slot 1 is the Weasel and
 flies with four AMRAAM, because there is an alert pair at Bassel Al-Assad and
@@ -1792,12 +1798,12 @@ uv run dcs-mission-creator generate {self.name} --players {self.players}
             m,
             country=usa,
             name="Uzi",
-            aircraft_type=planes.F_16C_50,
+            aircraft_type=self.player_aircraft_type(),
             airport=scene.hatay,
             maintask=task.SEAD,
             start_type=StartType.Warm,
             slots=self.players,
-            loadouts=_FITS,
+            loadouts=self.player_loadouts(_FITS, _HORNET_FITS),
         )
         push = scene.hatay.position.point_from_heading(
             scene.hatay.position.heading_between_point(scene.route_mid), 25_000.0

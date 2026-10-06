@@ -123,12 +123,12 @@ class UrbanScudHunt(ScudHunt):
         wind_at_8000=Wind(direction=330, speed=12),
     )
 
-    def __init__(self, *, players: int = 2) -> None:
+    def __init__(self, *, players: int = 2, aircraft=None) -> None:
         if players != 2:
             raise ValueError(
                 "urban_scud_hunt is fixed at one player plus one AI wingman"
             )
-        super().__init__(players=2)
+        super().__init__(players=2, aircraft=aircraft)
 
     def _assemble(self, m: Mission, plan: PlanOverlay) -> Assembled:
         """Build the urban circuit, traffic, combat response, and Razor flight."""
